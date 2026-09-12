@@ -106,10 +106,18 @@ ensure_baked_key() {
     fi
 }
 
+# win/LiFx.vcxproj must list the same sources as build_lifx below, or the
+# Visual Studio build breaks for Windows users. Warn (don't fail) on drift.
+check_vcxproj_sync() {
+    python3 scripts/sync_vcxproj.py --check || \
+        echo "WARNING: Windows project out of date -- commit the output of the command above" >&2
+}
+
 build_lifx() {
     echo ">>> Building $LIFX_DLL_NAME (LiFx)"
     mkdir -p "$OUT/ic"
     ensure_baked_key
+    check_vcxproj_sync
     local srcs=(
         source/core/cm_aux.cpp
         source/core/cm_globals.cpp

@@ -2,85 +2,418 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="..\source\cm_config.h" />
+    <ClInclude Include="..\source\core\cm_aux.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\core\cm_globals.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\core\cm_memory_mgr.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\source\core\cm_platform.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\core\cm_aux.h">
+    <ClInclude Include="..\source\core\crypto\chacha20.h">
+      <Filter>Core\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\core\crypto\key_provider.h">
+      <Filter>Core\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\core\crypto\lfxe_decrypt.h">
+      <Filter>Core\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\core\crypto\lfxe_filestream.h">
+      <Filter>Core\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\core\crypto\lfxe_format.h">
+      <Filter>Core\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\core\tinyxml2.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\server\hooks_engine.h">
-      <Filter>Server</Filter>
+    <ClInclude Include="..\source\server\api\lifx_battlezone.h">
+      <Filter>Server\API</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\core\cm_globals.h">
-      <Filter>Core</Filter>
+    <ClInclude Include="..\source\server\api\lifx_character.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_debug.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_dispatcher.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_effects.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_hostile.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_outpost.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_timers.h">
+      <Filter>Server\API</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\api\t3d_console.h">
       <Filter>Server\API</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\server\cm_wrappers.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\server\cm_server.h">
+    <ClInclude Include="..\source\server\cm_constants.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\cm_offsets.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\core\tinyxml2.h">
-      <Filter>Core</Filter>
+    <ClInclude Include="..\source\server\cm_server.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\cm_wrappers.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\ai\hook_behavior_node.h">
+      <Filter>Server\Hooks\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\battlezone\hook_battlezone_containment.h">
+      <Filter>Server\Hooks\Battlezone</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_animal_create.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_animal_death.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_apply_damage.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_calc_hit_damage.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_container_init.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_npcdec_pack.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_onepunchman.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_send_changes.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_set_control_object.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_setanimation.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_vital_process_tick.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\character\hook_wounds_deal_damage.h">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\dispatcher\dispatcher_client.h">
+      <Filter>Server\Hooks\Dispatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\effect\hook_assign_effect.h">
+      <Filter>Server\Hooks\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\effect\hook_broadcast_effects.h">
+      <Filter>Server\Hooks\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\effect\hook_effect_parse.h">
+      <Filter>Server\Hooks\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_console.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\server\cm_constants.h">
+    <ClInclude Include="..\source\server\hooks\engine\hook_filestream.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_gem_drop.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_recipe_starting_tools.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_tree_drop.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_tunnel_drop.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\engine_internals.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_brewing_tank_desc.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_brewing_tank_tick.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_proc_desc.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_working_fire_tick.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_working_furnace_tick.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_working_greenhouse_tick.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_working_trap_tick.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\furnace\hook_working_windmill_tick.h">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\netevent\hook_netclassrep_dumper.h">
+      <Filter>Server\Hooks\NetEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\netevent\sector_handoff_event.h">
+      <Filter>Server\Hooks\NetEvent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\outpost\hook_outpost_default_radius.h">
+      <Filter>Server\Hooks\Outpost</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\outpost\hook_outpost_proximity.h">
+      <Filter>Server\Hooks\Outpost</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\sector\client_redirect.h">
+      <Filter>Server\Hooks\Sector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\sector\sector_edge_trigger.h">
+      <Filter>Server\Hooks\Sector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\sector\world_grid.h">
+      <Filter>Server\Hooks\Sector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks_engine.h">
       <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\source\dllmain.cpp" />
-    <ClCompile Include="..\source\core\cm_memory_mgr.cpp">
+    <ClCompile Include="..\source\core\cm_aux.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\server\hooks_engine.cpp">
-      <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="..\source\core\cm_globals.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\server\api\t3d_console.cpp">
-      <Filter>Server\API</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\core\cm_aux.cpp">
+    <ClCompile Include="..\source\core\cm_memory_mgr.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\server\cm_server.cpp">
-      <Filter>Server</Filter>
+    <ClCompile Include="..\source\core\crypto\baked_key_provider.cpp">
+      <Filter>Core\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\core\crypto\chacha20.cpp">
+      <Filter>Core\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\core\crypto\lfxe_decrypt.cpp">
+      <Filter>Core\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\core\crypto\lfxe_filestream.cpp">
+      <Filter>Core\Crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\source\core\tinyxml2.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\dllmain.cpp" />
+    <ClCompile Include="..\source\server\api\lifx_battlezone.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_character.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_dispatcher.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_effects.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_hostile.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_outpost.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_timers.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\api\t3d_console.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\cm_server.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\ai\hook_behavior_node.cpp">
+      <Filter>Server\Hooks\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\battlezone\hook_battlezone_containment.cpp">
+      <Filter>Server\Hooks\Battlezone</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_animal_create.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_animal_death.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_apply_damage.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_calc_hit_damage.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_container_init.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_npcdec_pack.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_onepunchman.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_send_changes.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_set_control_object.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_setanimation.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_vital_process_tick.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\character\hook_wounds_deal_damage.cpp">
+      <Filter>Server\Hooks\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\dispatcher\dispatcher_client.cpp">
+      <Filter>Server\Hooks\Dispatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\effect\hook_assign_effect.cpp">
+      <Filter>Server\Hooks\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\effect\hook_broadcast_effects.cpp">
+      <Filter>Server\Hooks\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\effect\hook_effect_parse.cpp">
+      <Filter>Server\Hooks\Effect</Filter>
+    </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_console.cpp">
       <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_filestream.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_gem_drop.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_recipe_starting_tools.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_tree_drop.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_tunnel_drop.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_brewing_tank_desc.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_brewing_tank_tick.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_proc_desc.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_working_fire_tick.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_working_furnace_tick.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_working_greenhouse_tick.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_working_trap_tick.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\furnace\hook_working_windmill_tick.cpp">
+      <Filter>Server\Hooks\Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\netevent\hook_netclassrep_dumper.cpp">
+      <Filter>Server\Hooks\NetEvent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\netevent\sector_handoff_event.cpp">
+      <Filter>Server\Hooks\NetEvent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\outpost\hook_outpost_default_radius.cpp">
+      <Filter>Server\Hooks\Outpost</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\outpost\hook_outpost_proximity.cpp">
+      <Filter>Server\Hooks\Outpost</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\sector\client_redirect.cpp">
+      <Filter>Server\Hooks\Sector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\sector\sector_edge_trigger.cpp">
+      <Filter>Server\Hooks\Sector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\sector\world_grid.cpp">
+      <Filter>Server\Hooks\Sector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks_engine.cpp">
+      <Filter>Server</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
-      <UniqueIdentifier>{8d68246c-cfd4-4867-b246-afef722c2008}</UniqueIdentifier>
+      <UniqueIdentifier>{ff75f958-1462-5fd1-9066-71771f30c9d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Crypto">
+      <UniqueIdentifier>{836619a0-12a0-5940-bb50-284b95fdc5ac}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server">
-      <UniqueIdentifier>{68c08cfb-8234-4432-a097-68cdd3ab3bc4}</UniqueIdentifier>
+      <UniqueIdentifier>{e6c8115b-d460-538a-ad18-2a6052765073}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\API">
-      <UniqueIdentifier>{d958cd8c-aa9a-4e93-a3fa-49fb9fd35502}</UniqueIdentifier>
+      <UniqueIdentifier>{0937c2b3-949d-51aa-8cf3-c40efad1eb33}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Hooks">
-      <UniqueIdentifier>{bcbc8654-f38b-4508-bd71-d91fa78472ca}</UniqueIdentifier>
+      <UniqueIdentifier>{95eb127b-4e8a-51f6-98ee-d6a875ce0240}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\AI">
+      <UniqueIdentifier>{fcf38eaf-a3ea-57ed-88ba-f524b51a0fb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Battlezone">
+      <UniqueIdentifier>{4adac3a7-7af3-59af-804e-ee2a8966253a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Character">
+      <UniqueIdentifier>{c4b1d32f-d5d4-56a4-941e-3d487ad560ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Dispatcher">
+      <UniqueIdentifier>{b047dcfe-3127-513a-bba3-35d97d1df5aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Effect">
+      <UniqueIdentifier>{970c0871-645c-5ba2-915a-f30c31f94ce3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Hooks\Engine">
-      <UniqueIdentifier>{2ad72a11-9530-4abf-82ce-d2906ada047e}</UniqueIdentifier>
+      <UniqueIdentifier>{1f937828-2345-5bcf-88ea-ae92c9b31e09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Furnace">
+      <UniqueIdentifier>{74ce93c5-77e0-58d0-a09e-9760831d7b7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\NetEvent">
+      <UniqueIdentifier>{1cae784e-df4c-5b57-87ec-b0e0b2bda80a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Outpost">
+      <UniqueIdentifier>{22533f39-5f4a-5ebe-b514-08d41aa487a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Sector">
+      <UniqueIdentifier>{863f3a8d-88a1-5b44-b86b-16168da85749}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

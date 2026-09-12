@@ -16,30 +16,50 @@
     <ClInclude Include="..\source\core\cm_globals.h" />
     <ClInclude Include="..\source\core\cm_memory_mgr.h" />
     <ClInclude Include="..\source\core\cm_platform.h" />
+    <ClInclude Include="..\source\core\crypto\chacha20.h" />
+    <ClInclude Include="..\source\core\crypto\key_provider.h" />
+    <ClInclude Include="..\source\core\crypto\lfxe_decrypt.h" />
+    <ClInclude Include="..\source\core\crypto\lfxe_filestream.h" />
+    <ClInclude Include="..\source\core\crypto\lfxe_format.h" />
     <ClInclude Include="..\source\core\tinyxml2.h" />
-    <ClInclude Include="..\source\server\api\t3d_console.h" />
+    <ClInclude Include="..\source\server\api\lifx_battlezone.h" />
     <ClInclude Include="..\source\server\api\lifx_character.h" />
-    <ClInclude Include="..\source\server\api\lifx_outpost.h" />
+    <ClInclude Include="..\source\server\api\lifx_debug.h" />
+    <ClInclude Include="..\source\server\api\lifx_dispatcher.h" />
     <ClInclude Include="..\source\server\api\lifx_effects.h" />
     <ClInclude Include="..\source\server\api\lifx_hostile.h" />
-    <ClInclude Include="..\source\server\api\lifx_battlezone.h" />
-    <ClInclude Include="..\source\server\hooks\battlezone\hook_battlezone_containment.h" />
-    <ClInclude Include="..\source\server\hooks\outpost\hook_outpost_default_radius.h" />
-    <ClInclude Include="..\source\server\hooks\outpost\hook_outpost_proximity.h" />
-    <ClInclude Include="..\source\server\hooks\effect\hook_effect_parse.h" />
-    <ClInclude Include="..\source\server\hooks\netevent\hook_netclassrep_dumper.h" />
-    <ClInclude Include="..\source\server\hooks\netevent\sector_handoff_event.h" />
-    <ClInclude Include="..\source\server\hooks\dispatcher\dispatcher_client.h" />
-    <ClInclude Include="..\source\server\hooks\ai\hook_behavior_node.h" />
+    <ClInclude Include="..\source\server\api\lifx_outpost.h" />
+    <ClInclude Include="..\source\server\api\lifx_timers.h" />
+    <ClInclude Include="..\source\server\api\t3d_console.h" />
     <ClInclude Include="..\source\server\cm_constants.h" />
     <ClInclude Include="..\source\server\cm_offsets.h" />
     <ClInclude Include="..\source\server\cm_server.h" />
     <ClInclude Include="..\source\server\cm_wrappers.h" />
+    <ClInclude Include="..\source\server\hooks\ai\hook_behavior_node.h" />
+    <ClInclude Include="..\source\server\hooks\battlezone\hook_battlezone_containment.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_animal_create.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_animal_death.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_apply_damage.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_calc_hit_damage.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_container_init.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_npcdec_pack.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_onepunchman.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_send_changes.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_set_control_object.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_setanimation.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_vital_process_tick.h" />
+    <ClInclude Include="..\source\server\hooks\character\hook_wounds_deal_damage.h" />
+    <ClInclude Include="..\source\server\hooks\dispatcher\dispatcher_client.h" />
+    <ClInclude Include="..\source\server\hooks\effect\hook_assign_effect.h" />
+    <ClInclude Include="..\source\server\hooks\effect\hook_broadcast_effects.h" />
+    <ClInclude Include="..\source\server\hooks\effect\hook_effect_parse.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_console.h" />
-    <ClInclude Include="..\source\server\hooks\engine\hook_recipe_starting_tools.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_filestream.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_gem_drop.h" />
-    <ClInclude Include="..\source\server\hooks\engine\hook_tunnel_drop.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_recipe_starting_tools.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_tree_drop.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_tunnel_drop.h" />
+    <ClInclude Include="..\source\server\hooks\furnace\engine_internals.h" />
     <ClInclude Include="..\source\server\hooks\furnace\hook_brewing_tank_desc.h" />
     <ClInclude Include="..\source\server\hooks\furnace\hook_brewing_tank_tick.h" />
     <ClInclude Include="..\source\server\hooks\furnace\hook_proc_desc.h" />
@@ -48,40 +68,58 @@
     <ClInclude Include="..\source\server\hooks\furnace\hook_working_greenhouse_tick.h" />
     <ClInclude Include="..\source\server\hooks\furnace\hook_working_trap_tick.h" />
     <ClInclude Include="..\source\server\hooks\furnace\hook_working_windmill_tick.h" />
-    <ClInclude Include="..\source\server\hooks\character\hook_vital_process_tick.h" />
-    <ClInclude Include="..\source\server\hooks\character\hook_calc_hit_damage.h" />
-    <ClInclude Include="..\source\server\hooks\character\hook_wounds_deal_damage.h" />
-    <ClInclude Include="..\source\server\hooks\character\hook_send_changes.h" />
-    <ClInclude Include="..\source\server\hooks\character\hook_apply_damage.h" />
-    <ClInclude Include="..\source\server\hooks\character\hook_onepunchman.h" />
+    <ClInclude Include="..\source\server\hooks\netevent\hook_netclassrep_dumper.h" />
+    <ClInclude Include="..\source\server\hooks\netevent\sector_handoff_event.h" />
+    <ClInclude Include="..\source\server\hooks\outpost\hook_outpost_default_radius.h" />
+    <ClInclude Include="..\source\server\hooks\outpost\hook_outpost_proximity.h" />
+    <ClInclude Include="..\source\server\hooks\sector\client_redirect.h" />
+    <ClInclude Include="..\source\server\hooks\sector\sector_edge_trigger.h" />
+    <ClInclude Include="..\source\server\hooks\sector\world_grid.h" />
     <ClInclude Include="..\source\server\hooks_engine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\core\cm_aux.cpp" />
     <ClCompile Include="..\source\core\cm_globals.cpp" />
     <ClCompile Include="..\source\core\cm_memory_mgr.cpp" />
+    <ClCompile Include="..\source\core\crypto\baked_key_provider.cpp" />
+    <ClCompile Include="..\source\core\crypto\chacha20.cpp" />
+    <ClCompile Include="..\source\core\crypto\lfxe_decrypt.cpp" />
+    <ClCompile Include="..\source\core\crypto\lfxe_filestream.cpp" />
     <ClCompile Include="..\source\core\tinyxml2.cpp" />
     <ClCompile Include="..\source\dllmain.cpp" />
-    <ClCompile Include="..\source\server\api\t3d_console.cpp" />
+    <ClCompile Include="..\source\server\api\lifx_battlezone.cpp" />
     <ClCompile Include="..\source\server\api\lifx_character.cpp" />
-    <ClCompile Include="..\source\server\api\lifx_outpost.cpp" />
+    <ClCompile Include="..\source\server\api\lifx_dispatcher.cpp" />
     <ClCompile Include="..\source\server\api\lifx_effects.cpp" />
     <ClCompile Include="..\source\server\api\lifx_hostile.cpp" />
-    <ClCompile Include="..\source\server\api\lifx_battlezone.cpp" />
-    <ClCompile Include="..\source\server\hooks\battlezone\hook_battlezone_containment.cpp" />
-    <ClCompile Include="..\source\server\hooks\outpost\hook_outpost_default_radius.cpp" />
-    <ClCompile Include="..\source\server\hooks\outpost\hook_outpost_proximity.cpp" />
-    <ClCompile Include="..\source\server\hooks\effect\hook_effect_parse.cpp" />
-    <ClCompile Include="..\source\server\hooks\netevent\hook_netclassrep_dumper.cpp" />
-    <ClCompile Include="..\source\server\hooks\netevent\sector_handoff_event.cpp" />
-    <ClCompile Include="..\source\server\hooks\dispatcher\dispatcher_client.cpp" />
-    <ClCompile Include="..\source\server\hooks\ai\hook_behavior_node.cpp" />
+    <ClCompile Include="..\source\server\api\lifx_outpost.cpp" />
+    <ClCompile Include="..\source\server\api\lifx_timers.cpp" />
+    <ClCompile Include="..\source\server\api\t3d_console.cpp" />
     <ClCompile Include="..\source\server\cm_server.cpp" />
+    <ClCompile Include="..\source\server\hooks\ai\hook_behavior_node.cpp" />
+    <ClCompile Include="..\source\server\hooks\battlezone\hook_battlezone_containment.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_animal_create.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_animal_death.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_apply_damage.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_calc_hit_damage.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_container_init.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_npcdec_pack.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_onepunchman.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_send_changes.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_set_control_object.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_setanimation.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_vital_process_tick.cpp" />
+    <ClCompile Include="..\source\server\hooks\character\hook_wounds_deal_damage.cpp" />
+    <ClCompile Include="..\source\server\hooks\dispatcher\dispatcher_client.cpp" />
+    <ClCompile Include="..\source\server\hooks\effect\hook_assign_effect.cpp" />
+    <ClCompile Include="..\source\server\hooks\effect\hook_broadcast_effects.cpp" />
+    <ClCompile Include="..\source\server\hooks\effect\hook_effect_parse.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_console.cpp" />
-    <ClCompile Include="..\source\server\hooks\engine\hook_recipe_starting_tools.cpp" />
+    <ClCompile Include="..\source\server\hooks\engine\hook_filestream.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_gem_drop.cpp" />
-    <ClCompile Include="..\source\server\hooks\engine\hook_tunnel_drop.cpp" />
+    <ClCompile Include="..\source\server\hooks\engine\hook_recipe_starting_tools.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_tree_drop.cpp" />
+    <ClCompile Include="..\source\server\hooks\engine\hook_tunnel_drop.cpp" />
     <ClCompile Include="..\source\server\hooks\furnace\hook_brewing_tank_desc.cpp" />
     <ClCompile Include="..\source\server\hooks\furnace\hook_brewing_tank_tick.cpp" />
     <ClCompile Include="..\source\server\hooks\furnace\hook_proc_desc.cpp" />
@@ -90,12 +128,13 @@
     <ClCompile Include="..\source\server\hooks\furnace\hook_working_greenhouse_tick.cpp" />
     <ClCompile Include="..\source\server\hooks\furnace\hook_working_trap_tick.cpp" />
     <ClCompile Include="..\source\server\hooks\furnace\hook_working_windmill_tick.cpp" />
-    <ClCompile Include="..\source\server\hooks\character\hook_vital_process_tick.cpp" />
-    <ClCompile Include="..\source\server\hooks\character\hook_calc_hit_damage.cpp" />
-    <ClCompile Include="..\source\server\hooks\character\hook_wounds_deal_damage.cpp" />
-    <ClCompile Include="..\source\server\hooks\character\hook_send_changes.cpp" />
-    <ClCompile Include="..\source\server\hooks\character\hook_apply_damage.cpp" />
-    <ClCompile Include="..\source\server\hooks\character\hook_onepunchman.cpp" />
+    <ClCompile Include="..\source\server\hooks\netevent\hook_netclassrep_dumper.cpp" />
+    <ClCompile Include="..\source\server\hooks\netevent\sector_handoff_event.cpp" />
+    <ClCompile Include="..\source\server\hooks\outpost\hook_outpost_default_radius.cpp" />
+    <ClCompile Include="..\source\server\hooks\outpost\hook_outpost_proximity.cpp" />
+    <ClCompile Include="..\source\server\hooks\sector\client_redirect.cpp" />
+    <ClCompile Include="..\source\server\hooks\sector\sector_edge_trigger.cpp" />
+    <ClCompile Include="..\source\server\hooks\sector\world_grid.cpp" />
     <ClCompile Include="..\source\server\hooks_engine.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -155,7 +194,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\..\extra\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>detours.lib;psapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -176,10 +215,27 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\..\extra\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>detours.lib;psapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <!-- The LFXE baked-key header is generated + gitignored (docs/dts_encryption.md).
+       Mirrors ensure_baked_key in build_linux.sh: derive it from config\dts_key.bin,
+       generating a fresh key the first time. Needs Python 3 on PATH. -->
+  <PropertyGroup>
+    <LifxRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..'))</LifxRoot>
+    <LfxeKeyHeader>$(LifxRoot)\source\core\crypto\lfxe_key_data.h</LfxeKeyHeader>
+    <LfxeKeyFile>$(LifxRoot)\config\dts_key.bin</LfxeKeyFile>
+  </PropertyGroup>
+  <Target Name="GenerateLfxeKeyHeader" BeforeTargets="ClCompile" Condition="!Exists('$(LfxeKeyHeader)')">
+    <PropertyGroup>
+      <LfxeKeyArgs Condition="Exists('$(LfxeKeyFile)')">--key-in "$(LfxeKeyFile)"</LfxeKeyArgs>
+      <LfxeKeyArgs Condition="!Exists('$(LfxeKeyFile)')">--new --key-out "$(LfxeKeyFile)"</LfxeKeyArgs>
+      <LfxeKeyCmd>"$(LifxRoot)\scripts\gen_baked_key.py" $(LfxeKeyArgs)</LfxeKeyCmd>
+    </PropertyGroup>
+    <Exec Command="where py &gt;nul 2&gt;nul &amp;&amp; (py -3 $(LfxeKeyCmd)) || (python $(LfxeKeyCmd))" ContinueOnError="true" />
+    <Error Condition="!Exists('$(LfxeKeyHeader)')" Text="Could not generate $(LfxeKeyHeader). Install Python 3 and rebuild, or run from the repo root: python scripts\gen_baked_key.py --new --key-out config\dts_key.bin" />
+  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

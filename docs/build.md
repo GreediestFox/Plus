@@ -2,9 +2,9 @@
 title: Build
 status: reference
 domain: lifx-framework
-tags: [build, clang-cl, xwin, lld-link]
+tags: [build, clang-cl, xwin, lld-link, visual-studio, vcxproj]
 related: [architecture.md, loader_and_injection.md]
-updated: 2026-06-26
+updated: 2026-09-12
 ---
 
 # Build
@@ -12,7 +12,7 @@ updated: 2026-06-26
 LiFx supports two parallel build paths:
 
 - **Linux (recommended)** via `clang-cl` + `lld-link` + `xwin`. No Windows VM, no Wine. Produces real MSVC-ABI PE DLLs that link `extra/lib/detours.lib` unchanged.
-- **Windows** via `win/LiFx.sln` in Visual Studio 2022 (toolset v143, C++20). The original build path; still intact.
+- **Windows** via `win/LiFx.sln` in Visual Studio 2022 (toolset v143, C++20). The original build path. Its source list is generated from `build_linux.sh` (see [Keeping the VS project in sync](#keeping-the-vs-project-in-sync)).
 
 Both paths produce identical artifacts: the mod DLL (current name **`4ba5cb5e.dll`** — see [`architecture.md`](architecture.md) for why it's opaque) and `pdh.dll`, both under `win/build/Release/`.
 
@@ -73,6 +73,26 @@ Open `win/LiFx.sln` in Visual Studio 2022 (Community is fine). The solution has 
 - **LiFx_Loader** — builds `pdh.dll`. RootNamespace `LiFx_Loader`, TargetName `pdh`. No Detours dep.
 
 Both target Debug|x64 and Release|x64, v143 toolset, C++20. Build → outputs to `win/build/<Config>/`.
+
+### Prerequisites
+
+- Visual Studio 2022 with the **Desktop development with C++** workload (v143 toolset + a Windows 10/11 SDK).
+- **Python 3 on `PATH`** (`py` launcher or `python`). The LiFx project has a pre-build step (`GenerateLfxeKeyHeader`) that generates `source\core\crypto\lfxe_key_data.h`. That header is gitignored because it bakes in the asset-decryption key (see [`dts_encryption.md`](dts_encryption.md#keys)). It is created from `config\dts_key.bin`; if no key exists, a fresh one is generated there. Never commit either file. To load assets someone else encrypted, put their `dts_key.bin` in `config\` **before** the first build (or delete the header and rebuild).
+- Open the **`.sln`**. Don't use *Open Folder*, and don't copy `source\` elsewhere: the include and library paths (`..\extra\include`, `..\extra\lib`, where the vendored Detours lives) are relative to `win\`.
+- Build **x64** only; there is no Win32 configuration.
+
+The client DLL (`source/client/`) has no VS project; build it with `./build_linux.sh client`.
+
+### Keeping the VS project in sync
+
+`build_linux.sh`'s `build_lifx` source list is the single source of truth. `win/LiFx.vcxproj` (its `ClCompile`/`ClInclude` item groups) and `win/LiFx.vcxproj.filters` (folders in Solution Explorer) are generated from it:
+
+```bash
+python3 scripts/sync_vcxproj.py          # rewrite both files
+python3 scripts/sync_vcxproj.py --check  # exit 1 on drift
+```
+
+When you add or remove a mod-DLL source file, add it to `build_lifx` and re-run the script. `./build_linux.sh lifx` runs `--check` and prints a warning on drift. Until 2026-09 the project had silently fallen 18 files behind, which broke every Windows build with unresolved externals.
 
 ## Deploy
 

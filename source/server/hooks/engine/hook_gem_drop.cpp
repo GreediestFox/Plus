@@ -26,7 +26,7 @@
 #include "core/tinyxml2.h"
 
 #include <Windows.h>
-#include <detours.h>
+#include <detours/detours.h>
 #include <intrin.h>
 
 #include <algorithm>

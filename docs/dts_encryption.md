@@ -4,7 +4,7 @@ status: verified
 domain: reverse-engineering
 tags: [lfxe, encryption, chacha20, filestream, assets]
 related: [lfxe_texture_re.md]
-updated: 2026-06-26
+updated: 2026-09-12
 ---
 
 # Encrypted assets (LFXE)
@@ -104,8 +104,9 @@ never commit it). Two consumers share it:
 
 - **Client:** `scripts/gen_baked_key.py` bakes it into
   `source/core/crypto/lfxe_key_data.h` (also gitignored), XOR-masked by
-  a fixed LCG keystream so it isn't a plaintext run in the DLL. The client
-  build regenerates this header automatically if missing.
+  a fixed LCG keystream so it isn't a plaintext run in the DLL. Both
+  `build_linux.sh` and the Visual Studio project (`GenerateLfxeKeyHeader`
+  pre-build target, needs Python 3) regenerate this header automatically if missing.
 - **Packer:** `scripts/dts_encrypt.py` reads the same `config/dts_key.bin`.
 
 First build with no key generates a fresh one:

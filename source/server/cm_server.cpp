@@ -32,6 +32,14 @@
 #include "hooks/character/hook_set_control_object.h"
 #include "hooks/character/hook_npcdec_pack.h"
 #include "hooks/engine/hook_recipe_starting_tools.h"
+#include "hooks/engine/hook_workshop_buff.h"
+#include "hooks/engine/hook_greenhouse_alias.h"
+#include "hooks/engine/hook_stable_alias.h"
+#include "hooks/engine/hook_cart_places.h"
+#include "hooks/engine/hook_datablock_range.h"
+#include "hooks/engine/hook_crop_types.h"
+#include "hooks/engine/hook_well_water.h"
+#include "hooks/engine/hook_herb_garden_gate.h"
 #include "hooks/engine/hook_gem_drop.h"
 #include "hooks/engine/hook_tunnel_drop.h"
 #include "hooks/engine/hook_tree_drop.h"
@@ -42,7 +50,7 @@
 // raced world-load worker threads and hung the server. Set to 0 to build a
 // pure-isolation server with no equip intercept at all.
 #ifndef LIFX_EQUIP_PACK_HOOK
-#define LIFX_EQUIP_PACK_HOOK 1
+#define LIFX_EQUIP_PACK_HOOK 0
 #endif
 #include "hooks/outpost/hook_outpost_default_radius.h"
 #include "hooks/outpost/hook_outpost_proximity.h"
@@ -56,6 +64,9 @@
 #include "hooks/sector/world_grid.h"
 #include "hooks/dispatcher/dispatcher_client.h"
 #include "hooks/ai/hook_behavior_node.h"
+#include "hooks/ability/hook_light_working_object.h"
+#include "hooks/ability/hook_register_perform.h"
+#include "hooks/ability/hook_resolve_light_object.h"
 
 Lifx::Server* Lifx::Server::instance_{ nullptr };
 std::mutex Lifx::Server::instance_guard_;
@@ -69,10 +80,24 @@ void Lifx::Server::Init()
 	// here we load our low-level subsystems like Network, Threading e.t.c
 	// it's must be done BEFORE Torque init Console and call scripts (with CM server initialization)!
 
+	// Resolve config/lifxpluss.xml relative to the EXE's own directory rather
+	// than the process's current working directory -- LoadFile("config/...")
+	// was silently failing here because whatever sets up CWD by the time this
+	// runs no longer points at the server install dir. GetModuleFileNameA(NULL, ...)
+	// gives the exe's real path regardless of CWD.
+	char exePath[MAX_PATH]{};
+	GetModuleFileNameA(nullptr, exePath, MAX_PATH);
+	std::string configPath(exePath);
+	const auto lastSlash = configPath.find_last_of("\\/");
+	configPath = (lastSlash == std::string::npos)
+		? "config/lifxpluss.xml"
+		: configPath.substr(0, lastSlash + 1) + "config/lifxpluss.xml";
+
 	tinyxml2::XMLDocument xml_doc;
-	if (auto e = xml_doc.LoadFile("config/lifxpluss.xml") > 0)
+	const tinyxml2::XMLError e = xml_doc.LoadFile(configPath.c_str());
+	if (e != tinyxml2::XML_SUCCESS)
 	{
-		Lifx::ShowErrorMessage("Can't load lifxpluss.xml (Error code: %d)", e);
+		Lifx::ShowErrorMessage("Can't load lifxpluss.xml (Error code: %d)", static_cast<int>(e));
 		// todo: terminate process
 		return;
 	}
@@ -175,6 +200,14 @@ void Lifx::Server::Init()
 	{
 		const tinyxml2::XMLElement* root = xml_doc.RootElement();
 		Hooks::Engine::ConfigureRecipeStartingTools(root);
+		Hooks::Engine::ConfigureWorkshopBuff(root);
+		Hooks::Engine::ConfigureGreenhouseAlias(root);
+		Hooks::Engine::ConfigureStableAlias(root);
+		Hooks::Engine::ConfigureCartPlaces(root);
+		Hooks::Engine::ConfigureDatablockRange(root);
+		Hooks::Engine::ConfigureCropTypes(root);
+		Hooks::Engine::ConfigureWellWater(root);
+		Hooks::Engine::ConfigureHerbGardenGate(root);
 		Hooks::Engine::ConfigureGemDrops(root);
 		Hooks::Engine::ConfigureTunnelDrops(root);
 		Hooks::Engine::ConfigureTreeDrops(root);
@@ -362,6 +395,23 @@ void Lifx::Server::AttachHooks()
 	                 _WorkingWindmill_RecalcTick,
 	                 Hooks::WorkingWindmill::RecalcTick);
 
+	// Ability id 268 "Light the Fire" -- observation probe, see
+	// hooks/ability/hook_light_working_object.cpp.
+	__CM_ATTACH_HOOK(CmOffset::LIGHTWORKINGOBJECT_ONDOPERFORM,
+	                 _LightWorkingObject_OnDoPerform,
+	                 Hooks::LightWorkingObject::OnDoPerform);
+
+	// Generic ability-dispatch probe -- see hooks/ability/hook_register_perform.cpp.
+	// Only logs when abilityId==268, so this is silent for every other ability.
+	__CM_ATTACH_HOOK(CmOffset::SERVERMANAGER_REGISTERPERFORM,
+	                 _ServerManager_RegisterPerform,
+	                 Hooks::ServerManager::RegisterPerform);
+
+	// Observation probe -- see hooks/ability/hook_resolve_light_object.cpp.
+	__CM_ATTACH_HOOK(CmOffset::LIGHTON_RESOLVE_LIGHT_OBJECT,
+	                 _LightOn_ResolveLightObject_Orig,
+	                 Hooks::LightOnResolve::Call);
+
 	// Telemetry hook on the HP processor — used to identify which fields
 	// move when a player takes damage. Once the right field is known this
 	// can be removed.
@@ -541,6 +591,14 @@ void Lifx::Server::AttachHooks()
 	// These call DetourAttach directly, so they must stay inside this
 	// transaction.
 	Hooks::Engine::AttachRecipeStartingToolsHook();
+	Hooks::Engine::AttachWorkshopBuffHook();
+	Hooks::Engine::AttachGreenhouseAliasHook();
+	Hooks::Engine::AttachStableAliasHook();
+		Hooks::Engine::AttachCartPlacesHook();
+	Hooks::Engine::AttachDatablockRangeHook();
+	Hooks::Engine::AttachCropTypesHook();
+		Hooks::Engine::AttachWellWaterHook();
+	Hooks::Engine::AttachHerbGardenGateHooks();
 	Hooks::Engine::AttachGemDropHooks();
 	Hooks::Engine::AttachTunnelDropHook();
 
@@ -573,6 +631,27 @@ void Lifx::Server::AttachHooks()
 		          byteAt(CmOffset::CHAR_CALC_HIT_DAMAGE) == 0xE9 ? "(patched)" : "(NOT patched)");
 		Con::Echo("  FURNACE_PROC_DESC_LOOKUP %s",
 		          byteAt(CmOffset::FURNACE_PROC_DESC_LOOKUP) == 0xE9 ? "(patched)" : "(NOT patched)");
+		// Added while debugging complete silence from the WorkingFire probe
+		// (2026-09-11): __CM_ATTACH_HOOK never checks DetourAttach's return
+		// value, so a failed attach on any of these is otherwise invisible.
+		Con::Echo("  WORKING_FURNACE_RECALC_TICK %s",
+		          byteAt(CmOffset::WORKING_FURNACE_RECALC_TICK) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  BREWING_TANK_RECALC_TICK %s",
+		          byteAt(CmOffset::BREWING_TANK_RECALC_TICK) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  WORKING_FIRE_RECALC_TICK %s",
+		          byteAt(CmOffset::WORKING_FIRE_RECALC_TICK) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  WORKING_GREENHOUSE_RECALC_TICK %s",
+		          byteAt(CmOffset::WORKING_GREENHOUSE_RECALC_TICK) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  WORKING_TRAP_RECALC_TICK %s",
+		          byteAt(CmOffset::WORKING_TRAP_RECALC_TICK) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  WORKING_WINDMILL_RECALC_TICK %s",
+		          byteAt(CmOffset::WORKING_WINDMILL_RECALC_TICK) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  LIGHTWORKINGOBJECT_ONDOPERFORM %s",
+		          byteAt(CmOffset::LIGHTWORKINGOBJECT_ONDOPERFORM) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  SERVERMANAGER_REGISTERPERFORM %s",
+		          byteAt(CmOffset::SERVERMANAGER_REGISTERPERFORM) == 0xE9 ? "(patched)" : "(NOT patched)");
+		Con::Echo("  LIGHTON_RESOLVE_LIGHT_OBJECT %s",
+		          byteAt(CmOffset::LIGHTON_RESOLVE_LIGHT_OBJECT) == 0xE9 ? "(patched)" : "(NOT patched)");
 	}
 
 #if LIFX_EQUIP_PACK_HOOK
@@ -698,6 +777,9 @@ void Lifx::Server::DetachHooks()
 	__CM_DETACH_HOOK(_Char_CalcHitDamage,                Hooks::CharCalcHitDamage::Call);
 	__CM_DETACH_HOOK(_VitalParams_ProcessTick,           Hooks::VitalParams::ProcessTick);
 	__CM_DETACH_HOOK(_WorkingWindmill_RecalcTick,        Hooks::WorkingWindmill::RecalcTick);
+	__CM_DETACH_HOOK(_LightOn_ResolveLightObject_Orig,   Hooks::LightOnResolve::Call);
+	__CM_DETACH_HOOK(_ServerManager_RegisterPerform,     Hooks::ServerManager::RegisterPerform);
+	__CM_DETACH_HOOK(_LightWorkingObject_OnDoPerform,    Hooks::LightWorkingObject::OnDoPerform);
 	__CM_DETACH_HOOK(_WorkingTrap_RecalcTick,            Hooks::WorkingTrap::RecalcTick);
 	__CM_DETACH_HOOK(_WorkingGreenhouse_RecalcTick,      Hooks::WorkingGreenhouse::RecalcTick);
 	__CM_DETACH_HOOK(_WorkingFire_RecalcTick,            Hooks::WorkingFire::RecalcTick);

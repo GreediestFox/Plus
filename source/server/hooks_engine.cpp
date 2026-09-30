@@ -22,6 +22,7 @@
 #include "server/api/lifx_dispatcher.h"
 #include "server/api/lifx_hostile.h"
 #include "server/api/lifx_battlezone.h"
+#include "server/api/lifx_geo.h"
 #include "server/hooks/character/hook_setanimation.h"
 #include "server/hooks/character/hook_animal_death.h"
 #include "server/hooks/character/hook_animal_create.h"
@@ -171,6 +172,7 @@ namespace Hooks
 			Lifx::Api::Dispatcher::Register();
 			Lifx::Api::Hostile::Register();
 			Lifx::Api::BattleZone::Register();
+			Lifx::Api::Geo::Register();
 
 			Con::Echo(" ==== Powered by %s", kCoreVersionString);
 		}

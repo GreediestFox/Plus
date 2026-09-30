@@ -112,10 +112,18 @@ static const LifxFurnaceRow kExtensionRows[] =
 
 	// ===== example #2: kiln-style new clay brick =====
 	// { /* typeId */ 9100, /* kind */ 6, 0x3F800000, /* output */ 9101, 0, 0, 1000 },
+
+	// Trailing sentinel -- keeps the array non-empty so it compiles under
+	// /permissive- on newer MSVC (a zero-length array is a non-standard
+	// extension; older toolsets accepted it, this one rejects it as C2466).
+	// Never read: kExtensionRowCount below excludes it, and the lookup loop
+	// is bounds-limited to kExtensionRowCount, not the raw array. Add real
+	// rows above this line.
+	LifxFurnaceRow{},
 };
 
 static constexpr size_t kExtensionRowCount =
-	sizeof(kExtensionRows) / sizeof(kExtensionRows[0]);
+	sizeof(kExtensionRows) / sizeof(kExtensionRows[0]) - 1;
 
 // ----------------------------------------------------------------------------
 // LiFx C++ reimplementation of the engine's lookup (alternative to trampoline).
@@ -154,8 +162,9 @@ void* Hooks::Furnace::ProcDescLookup(void* itemTypeInfo)
 {
 	if (itemTypeInfo != nullptr && kExtensionRowCount > 0)
 	{
-		for (const auto& row : kExtensionRows)
+		for (size_t i = 0; i < kExtensionRowCount; ++i)
 		{
+			const auto& row = kExtensionRows[i];
 			if (::Engine::Type_HasParent(itemTypeInfo, static_cast<int>(row.typeId), 100))
 				return const_cast<LifxFurnaceRow*>(&row);
 		}

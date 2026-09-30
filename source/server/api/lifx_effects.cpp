@@ -19,6 +19,7 @@
 #include "server/hooks/character/hook_set_control_object.h"
 
 #include <cmath>
+#include <mutex>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -251,6 +252,296 @@ namespace
 			          row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
 			          row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15]);
 		}
+	}
+
+	// Force a placed light source (torch, campfire, etc.) on for N minutes.
+	//
+	// RE'd 2026-09-11 by walking ability id 268 "Light the Fire"
+	// (AbilityImp::LightWorkingObject::_onDoPerform, RVA 0x3A21F0): it lazily
+	// creates/finds a WorkingFire-typed timer object at (entity+0x384) and
+	// writes ServerTime_Now()+durationMs to its +0x28 stateAlt field via
+	// ::Engine::LightWorkingObject (RVA 0x1D9B20) -- the SAME mechanism
+	// WorkingFire::recalcTick reads, just reached on-demand instead of via a
+	// continuous per-tick call (recalcTick never fired for any placed light
+	// source in live testing, even an actively-used campfire).
+	//
+	// Registered on "GameBase" so it's callable as %object.lifxForceLight()
+	// on any placed object without needing to resolve a raw pointer by hand.
+	void ForceLight(LPVOID obj, S32 argc, const char* argv[])
+	{
+		if (obj == nullptr) {
+			Con::Warning("usage: %%object.lifxForceLight([minutes = 60]) -- call on a placed light source object");
+			return;
+		}
+		// argv[0]=method name, argv[1]=THIS object's id (Torque passes it
+		// redundantly alongside the already-resolved `obj` pointer) -- the
+		// real optional user argument is argv[2]. Confirmed live 2026-09-12
+		// via a "wrong number of arguments (got 3...)" error on a registered
+		// (1,2) bound while calling %obj.method(x) -- argc was 3, not 2.
+		const auto minutes = (argc > 2 && argv[2]) ? std::strtoul(argv[2], nullptr, 0) : 60u;
+		Con::Echo("[lifx-light] forceLight obj=%p minutes=%u", obj, (unsigned)minutes);
+		::Engine::LightWorkingObject(obj, static_cast<int>(minutes) * 60000);
+		Con::Echo("[lifx-light] forceLight done");
+	}
+
+	// LightOn variant of ForceLight above -- callable as
+	// %object.lifxForceLightOn(state) on any placed GameBase object, e.g.
+	// enumerated in script via nextInstanceOfClass(). Unlike Lifx::
+	// forceLightOn (which takes a raw hex pointer the caller must already
+	// have RTTI-cast correctly -- see engine_internals.h's crash writeup),
+	// this converts `obj` itself via a real __RTDynamicCast, so calling it on
+	// a placed object that has no light component just logs a warning and
+	// returns instead of crashing. This is the intended building block for
+	// the eventual dusk-sweep loop: resolve each placed torch/candle/brazier
+	// to a script object reference, then call this on it directly.
+	void ForceLightOnObj(LPVOID obj, S32 argc, const char* argv[])
+	{
+		if (obj == nullptr) {
+			Con::Warning("usage: %%object.lifxForceLightOn([state = 2 (1=off, 2=on)]) -- call on a placed light source object");
+			return;
+		}
+		// See ForceLight above -- argv[1] is this object's own id, not a user
+		// argument; the real optional state value is argv[2].
+		const auto state = (argc > 2 && argv[2]) ? std::strtoul(argv[2], nullptr, 0) : (unsigned)::Engine::kLightOn_On;
+		void* entity = ::Engine::GameBaseToComplexEntity(obj);
+		Con::Echo("[lifx-light] forceLightOnObj obj=%p -> entity=%p state=%u", obj, entity, (unsigned)state);
+		if (!entity) {
+			Con::Warning("[lifx-light] forceLightOnObj: obj is not a ComplexObject_Entity (RTTI cast failed) -- wrong object type?");
+			return;
+		}
+		const bool ok = ::Engine::LightOn_ForceState(entity, static_cast<int>(state));
+		Con::Echo("[lifx-light] forceLightOnObj %s", ok ? "done" : "FAILED (no light component on entity)");
+	}
+
+	struct ScanCounts { int total = 0; int resolvedEntity = 0; int resolvedLight = 0; };
+
+	// SEH-protected wrappers for the two other risky engine calls in this
+	// scan (position read + container search init/next) -- same reasoning
+	// and same "no destructible locals" constraint as ProbeOneCandidate
+	// below. Called from ScanNearbyLights, which holds a std::lock_guard and
+	// so cannot itself contain a __try block (MSVC C2712).
+	bool TryObjPos(void* obj, float& x, float& y, float& z)
+	{
+		__try { ::Engine::ObjPos(obj, x, y, z); return true; }
+		__except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+	}
+	bool TryContainerRadiusInit(const float center[3], float radius, unsigned mask)
+	{
+		__try { ::Engine::ContainerRadiusInit(center, radius, mask, false); return true; }
+		__except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+	}
+	void* TryContainerRadiusNext(bool& crashed)
+	{
+		__try { crashed = false; return ::Engine::ContainerRadiusNext(); }
+		__except (EXCEPTION_EXECUTE_HANDLER) { crashed = true; return nullptr; }
+	}
+
+	// SEH-protected per-object probe. MSVC forbids mixing __try/__except in a
+	// function that also has C++ objects needing unwind (e.g. std::lock_guard),
+	// so this is a separate function with ONLY POD locals -- called while the
+	// CALLER already holds Engine::ContainerSearchMutex(). Never lets a single
+	// bad/unexpectedly-shaped object take down the whole server: a crash here
+	// is caught, logged, and the scan continues with the next object.
+	//
+	// __RTDynamicCast is only well-defined when the SrcType we assert is a
+	// genuine ancestor of the object's REAL runtime type -- passing GameBase
+	// here for a non-GameBase-derived static prop is undefined behavior, not
+	// a safe null-return, and crashed the live server (confirmed 2026-09-12,
+	// second crash of this feature). That's exactly the class of mistake this
+	// wrapper exists to contain while the real type hierarchy is still being
+	// mapped out empirically.
+	void ProbeOneCandidate(void* o, void* selfObj, ScanCounts& counts)
+	{
+		if (o == selfObj) return;
+		uint32_t typeMask = 0;
+		void* entity = nullptr;
+		void* lightObj = nullptr;
+		bool crashed = false;
+		__try
+		{
+			typeMask = ::Engine::ObjTypeMask(o);
+			entity = ::Engine::GameBaseToComplexEntity(o);
+			if (entity)
+			{
+				unsigned long long buf[2] = { 0, 0 };
+				void* outBuf = ::Engine::LightOn_ResolveLightObject(entity, buf);
+				lightObj = *reinterpret_cast<void**>(outBuf);
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			crashed = true;
+		}
+		if (crashed)
+		{
+			Con::Warning("[lifx-light]   obj=%p -- CRASHED probing this object (caught), skipped", o);
+			return;
+		}
+		if (entity) ++counts.resolvedEntity;
+		if (lightObj) ++counts.resolvedLight;
+		Con::Echo("[lifx-light]   obj=%p typeMask=0x%X entity=%p lightObj=%p", o, typeMask, entity, lightObj);
+	}
+
+	// DIAGNOSTIC ONLY -- mutates nothing. Callable as %player.lifxScanNearbyLights(radius)
+	// on a live Player object. Runs a container radius search (the same
+	// primitive hooks/ai/hook_behavior_node.cpp's ScanNearestPlayer already
+	// uses in production) around the player with a broad type mask covering
+	// every plausible bit for a placed decorative prop (Light | StaticShape |
+	// DynamicShape -- see engine_internals.h's CONTAINER RADIUS SEARCH section
+	// for why these specific values, and why they're not 100% certain yet).
+	// For every object found, logs its own real typemask (so we can read off
+	// which bit torches ACTUALLY carry) plus whether GameBaseToComplexEntity +
+	// LightOn_ResolveLightObject succeed on it -- i.e. whether this candidate
+	// is a real, actuatable decorative light. This is the empirical test that
+	// answers the still-open "how do we enumerate placed torches" question
+	// before any code here is allowed to actually change object state in a loop.
+	// NOTE: LightOn_ResolveLightObject leaks one strong ref per candidate (see
+	// engine_internals.h) -- fine for one bounded diagnostic call, NOT fine to
+	// run repeatedly/on a timer without the real release logic implemented first.
+	void ScanNearbyLights(LPVOID obj, S32 argc, const char* argv[])
+	{
+		if (obj == nullptr) {
+			Con::Warning("usage: %%player.lifxScanNearbyLights([radius = 50] [, hex typeMask = 0xFFFFFFFF]) -- call on your own Player object");
+			return;
+		}
+		// See ForceLight above -- argv[1] is this object's own id, not a user
+		// argument; the real optional args start at argv[2].
+		const auto radius = (argc > 2 && argv[2]) ? static_cast<float>(std::strtod(argv[2], nullptr)) : 50.0f;
+		// Default is now a WIDE OPEN mask (catch everything), not the earlier
+		// narrow Light|StaticShape|DynamicShape guess -- now that every risky
+		// call here is SEH-protected (2026-09-12, see ProbeOneCandidate), a
+		// bad/incompatible candidate just gets logged and skipped instead of
+		// crashing the server, so there's no reason not to cast the widest
+		// possible net while we're still empirically discovering which
+		// typemask bit real torches use. Pass an explicit hex mask (argv[3])
+		// to narrow it back down once that's known.
+		const unsigned mask = (argc > 3 && argv[3]) ? std::strtoul(argv[3], nullptr, 16) : 0xFFFFFFFFu;
+
+		float px = 0, py = 0, pz = 0;
+		if (!TryObjPos(obj, px, py, pz)) {
+			Con::Warning("[lifx-light] scanNearbyLights: CRASHED reading own position (caught), aborting");
+			return;
+		}
+		Con::Echo("[lifx-light] scanNearbyLights center=(%.1f,%.1f,%.1f) radius=%.1f mask=0x%X", px, py, pz, (double)radius, mask);
+
+		const float center[3] = { px, py, pz };
+
+		// CRITICAL: this search is a process-global, non-reentrant singleton
+		// also used continuously by the AI tick thread (hook_behavior_node.cpp).
+		// Skipping this lock crashed the live server the first time this
+		// function was tested (2026-09-12) -- see engine_internals.h's
+		// ContainerSearchMutex() for the full writeup. Held for the entire
+		// init+drain, matching hook_behavior_node.cpp's own discipline.
+		std::lock_guard<std::mutex> lk(::Engine::ContainerSearchMutex());
+		if (!TryContainerRadiusInit(center, radius, mask)) {
+			Con::Warning("[lifx-light] scanNearbyLights: CRASHED during ContainerRadiusInit (caught), aborting");
+			return;
+		}
+
+		ScanCounts counts;
+		// Defensive iteration cap -- see lifx_effects.cpp's other scans for why
+		// (a stuck/misbehaving search should never be able to hang the server).
+		constexpr int kMaxResults = 2000;
+		for (;;)
+		{
+			bool crashed = false;
+			void* o = TryContainerRadiusNext(crashed);
+			if (crashed) {
+				Con::Warning("[lifx-light] scanNearbyLights: CRASHED during ContainerRadiusNext (caught), stopping early");
+				break;
+			}
+			if (!o || counts.total >= kMaxResults) break;
+			++counts.total;
+			ProbeOneCandidate(o, obj, counts);
+		}
+		Con::Echo("[lifx-light] scanNearbyLights done: %d objects, %d cast to entity, %d resolved a light component",
+		          counts.total, counts.resolvedEntity, counts.resolvedLight);
+	}
+
+	// Raw-pointer variant for testing -- takes an absolute entity pointer
+	// (e.g. one logged by the LightWorkingObject::_onDoPerform probe) instead
+	// of resolving a live object reference through script. Same convention as
+	// Lifx::dumpPtr above.
+	// Parses a pointer typed at the console, e.g. one copied from a %p-style
+	// log line (always zero-padded to 16 hex digits, so it always "looks
+	// like" a leading-zero octal literal). Base 16 (not base 0!) is required
+	// -- strtoull's base-0 auto-detection treats a leading "0" with no "x" as
+	// OCTAL, silently truncating at the first non-octal digit (e.g. the "B"
+	// in "000001B189BD6920"), which previously produced entity=0x1 and
+	// crashed the server on dereference. Base 16 still accepts an optional
+	// "0x"/"0X" prefix per the C standard, so this works with or without one.
+	// Also rejects anything that isn't a plausible heap pointer (real 64-bit
+	// process addresses are always far above 0x10000) so a future typo warns
+	// instead of crashing the server again.
+	bool ParseEntityPointerArg(const char* text, void** outEntity)
+	{
+		const auto addr = std::strtoull(text, nullptr, 16);
+		if (addr < 0x10000) {
+			Con::Warning("'%s' doesn't look like a valid pointer (parsed as 0x%llX) -- refusing to dereference it. "
+			             "Did you forget the 0x prefix, or mistype a digit?", text, (unsigned long long)addr);
+			return false;
+		}
+		*outEntity = reinterpret_cast<void*>(addr);
+		return true;
+	}
+
+	void ForceLightAt(LPVOID /*obj*/, S32 argc, const char* argv[])
+	{
+		if (argc < 2) {
+			Con::Warning("usage: Lifx::forceLightAt(<hex entity pointer> [, minutes = 60])");
+			return;
+		}
+		void* entity = nullptr;
+		if (!ParseEntityPointerArg(argv[1], &entity))
+			return;
+		const auto minutes = (argc > 2 && argv[2]) ? std::strtoul(argv[2], nullptr, 0) : 60u;
+		Con::Echo("[lifx-light] forceLightAt entity=%p minutes=%u", entity, (unsigned)minutes);
+		::Engine::LightWorkingObject(entity, static_cast<int>(minutes) * 60000);
+		Con::Echo("[lifx-light] forceLightAt done");
+	}
+
+	// Raw-pointer test command for the REAL ability-268 mechanism (AbilityImp::
+	// LightOn -- see engine_internals.h's "LIGHT ON" section for the full RE
+	// writeup). `entity` must be a ComplexObject_Entity* -- e.g. one logged by
+	// this session's SERVERMANAGER_REGISTERPERFORM probe, or by extending it
+	// to also print self+0x38 for ability 268. Testing only: each call leaks
+	// one strong ref (see engine_internals.h) -- do not loop this over many
+	// objects.
+	void ForceLightOn(LPVOID /*obj*/, S32 argc, const char* argv[])
+	{
+		if (argc < 2) {
+			Con::Warning("usage: Lifx::forceLightOn(<hex entity pointer> [, state = 2 (1=off, 2=on)])");
+			return;
+		}
+		void* entity = nullptr;
+		if (!ParseEntityPointerArg(argv[1], &entity))
+			return;
+		const auto state = (argc > 2 && argv[2]) ? std::strtoul(argv[2], nullptr, 0) : (unsigned)::Engine::kLightOn_On;
+		Con::Echo("[lifx-light] forceLightOn entity=%p state=%u", entity, (unsigned)state);
+		const bool ok = ::Engine::LightOn_ForceState(entity, static_cast<int>(state));
+		Con::Echo("[lifx-light] forceLightOn %s", ok ? "done" : "FAILED (no light component on entity)");
+	}
+
+	// Simplest, safest test path: sets the state directly on an ALREADY-
+	// resolved light-component pointer (the "lightObj" logged by
+	// hook_resolve_light_object.cpp's probe) -- no entity/RTTI-cast
+	// resolution step, so no ref-counting involved at all (see engine_
+	// internals.h's refcounting warning on LightOn_ForceState/
+	// ResolveLightObject). Use this once you have a live lightObj value from
+	// the probe log instead of ForceLightOn's entity-pointer path.
+	void ForceLightObjState(LPVOID /*obj*/, S32 argc, const char* argv[])
+	{
+		if (argc < 2) {
+			Con::Warning("usage: Lifx::forceLightObjState(<hex lightObj pointer> [, state = 2 (1=off, 2=on)])");
+			return;
+		}
+		void* lightObj = nullptr;
+		if (!ParseEntityPointerArg(argv[1], &lightObj))
+			return;
+		const auto state = (argc > 2 && argv[2]) ? std::strtoul(argv[2], nullptr, 0) : (unsigned)::Engine::kLightOn_On;
+		Con::Echo("[lifx-light] forceLightObjState lightObj=%p state=%u", lightObj, (unsigned)state);
+		::Engine::LightOn_SetState(lightObj, static_cast<int>(state), true);
+		Con::Echo("[lifx-light] forceLightObjState done");
 	}
 
 	// Snapshot/diff state. One global slot is enough — we use this
@@ -933,6 +1224,25 @@ namespace
 		}
 		Con::Warning("[lifx-effects]   walk capped at %u nodes — your offset guess may be wrong (loop or non-list)", kMaxNodesToWalk);
 	}
+
+	// Execute-only raw SQL, for script mods that need to persist their own
+	// data (e.g. a GM action log table) without a native command written
+	// specifically for their schema. See engine_internals.h's DATABASE
+	// section for the RE writeup and the important caveat: this cannot
+	// return query results (INSERT/UPDATE/CREATE TABLE only). The caller is
+	// responsible for its own SQL escaping (script-side dbi_escapeString()
+	// convention, matching what the calling mod already expects).
+	void DbExec(LPVOID /*obj*/, S32 argc, const char* argv[])
+	{
+		if (argc < 2 || !argv[1] || !argv[1][0]) {
+			Con::Warning("usage: Lifx::dbExec(<sql>) -- execute-only, no result rows returned");
+			return;
+		}
+		const bool ok = ::Engine::DB_ExecNoResult(argv[1]);
+		if (!ok) {
+			Con::Warning("[lifx-db] dbExec FAILED: %s", argv[1]);
+		}
+	}
 }
 
 void Lifx::Api::Effects::Register()
@@ -952,6 +1262,33 @@ void Lifx::Api::Effects::Register()
 	Con::AddCommand("Lifx", "dumpPtr", &DumpPtr,
 	                "(hex pointer [, byteCount]) - hex dump bytes at an absolute address (e.g. a container hit from findEffect)",
 	                2, 3);
+	// NB: for a "GameBase"-scoped method %obj.method(x), Torque's real argc
+	// includes argv[0]=method name AND argv[1]=this object's own id (in
+	// addition to handing the resolved pointer as `obj` separately) -- so a
+	// zero-arg call is argc=2 and a one-arg call is argc=3. Confirmed live
+	// 2026-09-12 via a "wrong number of arguments" error on a wrongly-
+	// registered (1,2) bound.
+	Con::AddCommand("GameBase", "lifxForceLight", &ForceLight,
+	                "([minutes = 60]) - force this placed object's light source on for N minutes (RE: LightWorkingObject::_onDoPerform, RVA 0x3A21F0)",
+	                2, 3);
+	Con::AddCommand("GameBase", "lifxForceLightOn", &ForceLightOnObj,
+	                "([state = 2 (1=off, 2=on)]) - toggle this placed object's DECORATIVE light (torch/candle/brazier) via the real ability-268 mechanism (AbilityImp::LightOn), safely -- no-op with a warning if this object has no light component",
+	                2, 3);
+	Con::AddCommand("GameBase", "lifxScanNearbyLights", &ScanNearbyLights,
+	                "([radius = 50] [, hex typeMask = 0xFFFFFFFF]) - DIAGNOSTIC (read-only): call on your Player object to list nearby objects, their real engine typemask, and whether each one resolves as an actuatable decorative light -- answers which typemask bit placed torches actually carry. Every risky call is SEH-protected, so a bad candidate is safely skipped, not fatal.",
+	                2, 4);
+	Con::AddCommand("Lifx", "forceLightAt", &ForceLightAt,
+	                "(hex entity pointer [, minutes = 60]) - force a light source on by raw pointer (e.g. one logged by the LightWorkingObject probe) -- for testing without a live object reference",
+	                2, 3);
+	Con::AddCommand("Lifx", "forceLightOn", &ForceLightOn,
+	                "(hex entity pointer [, state = 2 (1=off, 2=on)]) - toggle a DECORATIVE light (torch/candle/brazier) via the real ability-268 mechanism (AbilityImp::LightOn) -- testing only, leaks one ref per call",
+	                2, 3);
+	Con::AddCommand("Lifx", "forceLightObjState", &ForceLightObjState,
+	                "(hex lightObj pointer [, state = 2 (1=off, 2=on)]) - sets state directly on an already-resolved light component (e.g. the lightObj value logged by the resolveLightObject probe) -- no ref-counting involved, safer than forceLightOn for quick tests",
+	                2, 3);
+	Con::AddCommand("Lifx", "dbExec", &DbExec,
+	                "(sql) - execute a raw SQL statement with no result rows (INSERT/UPDATE/CREATE TABLE only) -- for script mods needing their own persisted tables. Caller must escape its own input.",
+	                2, 2);
 	Con::AddCommand("Lifx", "snapshotChar", &SnapshotChar,
 	                "(int charID [, hex startOff = 0] [, hex endOff = 0x10000]) - save the bytes of the character struct subrange",
 	                2, 4);

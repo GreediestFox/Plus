@@ -8,6 +8,7 @@
 
 #include "server/cm_offsets.h"
 #include "server/api/t3d_console.h"
+#include "server/hooks/furnace/engine_internals.h"
 
 #include <atomic>
 #include <cfloat>
@@ -330,9 +331,13 @@ namespace
 	std::unordered_map<uint32_t, NpcAiState> g_npcState;
 
 	// The container radius search is a process-global, non-reentrant singleton,
-	// so serialize the scan (the AI tick is normally single-threaded, but this
-	// is cheap insurance). initContainerRadiusSearch / containerSearchNext.
-	std::mutex g_scanMtx;
+	// so serialize the scan via the SHARED lock in engine_internals.h
+	// (Engine::ContainerSearchMutex) rather than a private mutex here -- a
+	// private-per-file mutex does NOT actually exclude other callers of the
+	// same engine singleton from a DIFFERENT translation unit. Confirmed the
+	// hard way 2026-09-12: Lifx::scanNearbyLights (lifx_effects.cpp) called
+	// this same search with no lock at all, raced this AI tick, and crashed
+	// the live server. initContainerRadiusSearch / containerSearchNext.
 	using pfn_radiusInit = void  (__fastcall*)(void* posXyz, float radius, unsigned mask, bool useClient); // 0x51A490
 	using pfn_radiusNext = void* (__fastcall*)();                                                          // 0x51A480 (sets this)
 	constexpr unsigned kPlayerObjectType = 0x8000;
@@ -369,13 +374,14 @@ namespace
 	// self) or nullptr. Shared by SetNearestPlayerAsTarget / ChaseTarget /
 	// FleeFromTarget. Re-scanning per tick (rather than caching a target pointer)
 	// keeps Chase/Flee self-healing when the target leaves scope. The container
-	// search is a global non-reentrant singleton -> serialized by g_scanMtx.
+	// search is a global non-reentrant singleton -> serialized by the shared
+	// Engine::ContainerSearchMutex() (engine_internals.h).
 	void* ScanNearestPlayer(void* creature, float radius)
 	{
 		float sx, sy, sz; ObjPos(creature, sx, sy, sz);
 		float center[3] = { sx, sy, sz };
 		void* best = nullptr; float bestD2 = FLT_MAX;
-		std::lock_guard<std::mutex> lk(g_scanMtx);
+		std::lock_guard<std::mutex> lk(::Engine::ContainerSearchMutex());
 		AtRva<pfn_radiusInit>(0x51A490)(center, radius, kPlayerObjectType, false);
 		auto next = AtRva<pfn_radiusNext>(0x51A480);
 		for (void* o = next(); o != nullptr; o = next())       // drain fully (singleton)

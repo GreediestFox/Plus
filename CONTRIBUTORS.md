@@ -64,6 +64,41 @@ server hooks, plus the analysis documenting them:
 - `docs/offsets.md` — RVA encyclopedia for the verified 1.4.4.5 server image
 - `docs/farming.md` — `Harvest Crops` quantity and quality formulas
 
+**GreedyFox** — reverse engineering and implementation of configurable server
+hooks for modded *Your Own* servers, plus the documentation for them:
+
+- `source/server/hooks/engine/hook_crop_types.{h,cpp}` — extra farmable crops
+  on the shared sow/grow/harvest code, and the wild-gatherable type limit
+- `source/server/hooks/engine/hook_datablock_range.{h,cpp}` — wider datablock id
+  range (more movable object types)
+- `source/server/hooks/engine/hook_greenhouse_alias.{h,cpp}` — custom object
+  types that behave as the Herbal Garden / Drying Frame / Tanning Tub
+- `source/server/hooks/engine/hook_herb_garden_gate.{h,cpp}` — plant-then-collect
+  timer for crafting-based gardens
+- `source/server/hooks/engine/hook_stable_alias.{h,cpp}` — custom stables with
+  capacity and allowed-animal rules
+- `source/server/hooks/engine/hook_workshop_buff.{h,cpp}` — crafting-quality
+  buff near configured workshops
+- `source/server/hooks/engine/hook_well_water.{h,cpp}` — water amount per
+  "Get Water" action
+- `source/server/hooks/engine/hook_cart_places.{h,cpp}` — per-cart-type
+  "put in cart" capacity
+- `source/server/hooks/ability/hook_register_perform.{h,cpp}`,
+  `hook_light_working_object.{h,cpp}`, `hook_resolve_light_object.{h,cpp}` —
+  observation probes for the light-activation ability
+- `source/server/api/lifx_geo.{h,cpp}` — world-position to geo-tile helper
+- `docs/YO_SERVER_HOOKS.md`, `docs/examples/lifxpluss.yo-hooks.example.xml` —
+  index, usage and example configuration for the hooks above
+
+Additions (registration, offsets, helpers) to existing files, no change to their
+headers: `source/server/cm_server.cpp`, `source/server/cm_offsets.h`,
+`source/server/hooks_engine.cpp`, `source/server/api/lifx_effects.cpp`,
+`source/server/hooks/furnace/engine_internals.h`,
+`source/server/hooks/furnace/hook_proc_desc.cpp`,
+`source/server/hooks/furnace/hook_working_fire_tick.cpp`,
+`source/server/hooks/ai/hook_behavior_node.cpp`, `build_linux.sh`,
+`win/LiFx.vcxproj` (+ `.filters`).
+
 ## Adding to this file
 
 When code from outside the project lands here, record it in two places: a credit

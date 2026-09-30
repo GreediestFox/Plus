@@ -85,6 +85,29 @@ enum CmOffset : U32
 	WORKING_TRAP_RECALC_TICK        = 0x1DEE90,   // animal traps
 	WORKING_WINDMILL_RECALC_TICK    = 0x1DFF20,   // windmill flour grinding (trivial state update)
 
+	// Ability id 268 "Light the Fire" -- AbilityImp::LightWorkingObject::_onDoPerform.
+	// RE'd 2026-09-11/12: resolves the target ComplexObject_Entity (at self+0x38),
+	// then calls ::Engine::LightWorkingObject-equivalent logic (entity+0x384 timer,
+	// stateAlt = ServerTime_Now()+duration at +0x28 of a lazily-created WorkingFire).
+	// See source/server/hooks/furnace/engine_internals.h's LightWorkingObject().
+	LIGHTWORKINGOBJECT_ONDOPERFORM  = 0x3A21F0,
+
+	// AbilityImp::ServerManager::_registerPerform -- the single generic
+	// dispatch point the engine calls for EVERY ability perform. RE'd
+	// 2026-09-12 via its own diagnostic string. Used as an observation probe
+	// to find which concrete class REALLY backs ability id 268, since
+	// LIGHTWORKINGOBJECT_ONDOPERFORM above was confirmed by live testing to
+	// never fire for it. See source/server/hooks/ability/hook_register_perform.cpp.
+	SERVERMANAGER_REGISTERPERFORM   = 0x3B5D80,
+
+	// Light-component resolver called by LightOn::_onDoPerform with an
+	// ALREADY __RTDynamicCast'd ComplexObject_Entity* -- NOT the raw self+
+	// 0x38 pointer. Hooked as an observation probe to capture the real,
+	// correctly-cast value live (a raw/uncast pointer fed to this function
+	// directly crashed a "invalid super-type" engine error, confirmed
+	// 2026-09-12). See source/server/hooks/ability/hook_resolve_light_object.cpp.
+	LIGHTON_RESOLVE_LIGHT_OBJECT    = 0x33DDB0,
+
 	// BrewingTankFurnace's own process-descriptor lookup at DAT_140ACF8D0.
 	// Distinct from the WorkingFurnace lookup hooked above — brewing has its
 	// own table. See docs/bloomery.md "Craftwork class family — full coverage".

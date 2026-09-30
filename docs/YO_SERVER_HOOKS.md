@@ -1,56 +1,52 @@
-# Life is Feudal: Your Own - server hooks (engine extensions)
+---
+title: YO server engine hooks (crops, datablocks, aliases, buff, carts, wells)
+status: re
+domain: reverse-engineering
+tags: [hooks, farming, crafting, datablock, aliases, workshop-buff]
+related: [farming.md, craftwork_containers.md, conventions.md, build.md, offsets.md]
+sources: [source/server/hooks/engine/hook_crop_types.h, source/server/hooks/engine/hook_datablock_range.h, source/server/hooks/engine/hook_greenhouse_alias.h, source/server/hooks/engine/hook_herb_garden_gate.h, source/server/hooks/engine/hook_stable_alias.h, source/server/hooks/engine/hook_workshop_buff.h, source/server/hooks/engine/hook_well_water.h, source/server/hooks/engine/hook_cart_places.h, source/server/hooks/ability/hook_register_perform.h, docs/examples/lifxpluss.yo-hooks.example.xml]
+updated: 2026-09-30
+---
 
-New in-memory hooks for `ddctd_cm_yo_server.exe`, all following the Plus rules (the server exe is **never** modified on disk; every change is a detour or a runtime memory patch that is verified byte by byte before it is applied, and skipped with a log line if the bytes do not match).
+# YO server engine hooks
 
-Each hook has its own header with the full reverse-engineering notes (RVAs, structures, how the engine wires the feature) and the exact config syntax. This page is the index and the how-to.
+Eight configurable in-memory hooks for `ddctd_cm_yo_server.exe` that let a modded *Your Own* server add farmable crops, widen the datablock id range, make custom buildings behave as vanilla ones, buff crafting quality near custom workshops and raise hard-coded capacities (cart places, well water). Every hook is off unless its element is present in `config/lifxpluss.xml` with `enabled="1"`. Nothing is ever written to the server exe on disk (Plus rule 1): each hook is a Detours detour or a runtime memory patch whose bytes are verified first and skipped with a log line on mismatch.
 
-All RVAs are for the current Steam build of the YO dedicated server (AppID 1062390 depot) at the time of writing. If a hook logs a signature mismatch at boot it simply does not attach; it never patches blindly.
+The authoritative per-hook notes (structures, rationale, config syntax) are the header comments of the `hook_*.h` files listed in `sources:`; this page is the index, the RVA table and the how-to. A complete example config is in [`examples/lifxpluss.yo-hooks.example.xml`](examples/lifxpluss.yo-hooks.example.xml) (the ids in it belong to one modpack; replace them with your own).
 
 ## Quick start
 
-1. Build (same as every other Plus hook):
-   ```
-   msbuild win\LiFx.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64
-   ```
-2. Copy the built DLL next to the server exe exactly like the rest of Plus (see the existing README).
-3. Add the elements you want to `config/lifxpluss.xml` (full example: [`docs/examples/lifxpluss.yo-hooks.example.xml`](examples/lifxpluss.yo-hooks.example.xml)). Every hook is **off unless its element is present with `enabled="1"`**. Set `verbose="1"` the first time; the boot log then states exactly which sites were patched.
-4. Start the server. Look for the hook's log lines (e.g. `gatherable type limit raised: valid types 0..224`).
+1. Build as in [`build.md`](build.md); the new sources are registered in `build_linux.sh` and `win/LiFx.vcxproj` (kept in sync by `scripts/sync_vcxproj.py`).
+2. Deploy the DLL as for every other hook ([`loader_and_injection.md`](loader_and_injection.md)).
+3. Add the wanted elements to `config/lifxpluss.xml`; set `verbose="1"` the first time. The boot log states exactly which sites were patched (for example `gatherable type limit raised: valid types 0..224`).
 
-The ids in the example config (object types 2829, 2894, ...) belong to a specific modpack; replace them with your own object/ability/recipe ids.
+## Hooks and RVAs
 
-## Hooks
+RVAs are relative to image base `0x140000000`. The constants for these sites currently live in the hook sources, not in `cm_offsets.h`.
 
-| Hook (source in `source/server/hooks/engine/` unless noted) | What it does | Config element |
+| Hook (`source/server/hooks/engine/`) | Config element | Sites (RVA) |
 |---|---|---|
-| `hook_crop_types` | Extra farmable crops that reuse the engine's shared sow/grow/harvest code (new ability id + new 10-wide substance block per crop), plus `maxGatherableType` to raise the wild-plant gatherable type limit from 218 to up to 254 | `<cropTypes>` |
-| `hook_datablock_range` | Widens the network datablock id range (0x402 -> 0x1002) so the number of movable object types is no longer capped around 220. **The client exe needs the same change** | `<datablockRange>` |
-| `hook_greenhouse_alias` | A custom object type behaves as the vanilla Herbal Garden (1353), or keeps working state across restarts like a Drying Frame (118) / Tanning Tub (472) | `<greenhouseAlias>` |
-| `hook_herb_garden_gate` | "Plant now, collect later" timer for crafting-based gardens, and instant-with-fixed-quality collect gates | `<herbGardenGate>` |
-| `hook_stable_alias` | A custom building behaves as Coop / Barn / Stable, with per-building capacity and an allowed-animals / single-item-store rule | `<stableAlias>` |
-| `hook_workshop_buff` | The x1.2 workshop crafting-quality buff for any configured workshop type and ability (vanilla has it for six hard-coded buildings only) | `<workshopBuff>` |
-| `hook_well_water` | A well gives N water per "Get Water" action | `<wellWater>` |
-| `hook_cart_places` | Per-cart-type capacity for "put movable in cart" (vanilla: 12 for every cart) | `<cartPlaces>` |
-| `ability/hook_register_perform`, `hook_light_working_object`, `hook_resolve_light_object` | Observation-only probes used to trace the "Light the Fire" ability | (diagnostic) |
-| `api/lifx_geo.*`, `api/lifx_effects.cpp`, `cm_offsets.h`, `engine_internals.h` | Supporting helpers and offsets for the hooks above | - |
+| `hook_crop_types` | `<cropTypes maxSubstanceWidth maxGatherableType>` with `<crop abilityId seedItemId fertileSmallSubstance nonFertileSmallSubstance aliasBase name>` | `BasePlantImp::_onDoPerform` `0x3A4550` (shared by abilities 133-140); ability-id keyed crop map global `0xB98D10`, insert fn `0x3A95C0`; "register all built-in abilities" step `0x31D040`, `_registerAbility` `0x327D20`, base-init `0x317020`, reused vtable `PlantWheat_Ability` `0x7F7A10`; substance registry lookup `0x572DE0`; harvest map (u8 substance -> item) global `0xB98D50`, get-or-default helper `0x3A94A0`; `HarvestPlant::_onDoPerform` `0x3A5030` (see [`farming.md`](farming.md)); gatherable type limit `cmp ecx,0DAh` (`81 F9 DA 00 00 00`, imm at +2) at `0x3796D8`, `0x379758`, `0x3797C8`, `0x379A00` |
+| `hook_datablock_range` | `<datablockRange>` | `Complex::ObjectType::TypeStorage` ctor counter imm32 `0xCEC86` (800 -> 1027); ghost pack write `mov r9d,402h` imm32 `0x13372B`, read `mov r8d,402h` imm32 `0x133D24` (0x402 -> 0x1002); first ordinary object id imm32 `0x4297F7` and live counter `0xBC8FD4` (0x443 -> 0x1043); `writeInt` width 10 -> 12 at `0x11D7D8`, `0x1389B6`. The client executable needs the equivalent change (no client patcher is part of this repository) |
+| `hook_greenhouse_alias` | `<greenhouseAlias>` with `<alias objectTypeId behavesLike finishedAsWorking>` | `CmCraftworkManager::loadObjects` `0x1D8E20` (compare at `0x1D8E92`, arg 4 remapped); greenhouse "use" entry `0x1D91D0` (compare type id `0x549` at `0x1D92AD`); `Entity::GetTypeInfo` `0xC9930`, only for the call at `0x1D9220` (return address `0x1D9225`); `Type::getId` `0xD3790` (4-byte getter, cannot be detoured) |
+| `hook_herb_garden_gate` | `<herbGardenGate>` with `<gate>` children | `CmCreationManager::craftWithDevice` `0x1E4B10`, `_finallyMakeItem` `0x1E3C60`; device-craft ability slot 3 `0x365BE0`; greenhouse reagent check `0x1DD8C0`, start `0x1DE740`, tick `0x1DEA70`; message helper (connection, id only) `0x8CC10` |
+| `hook_stable_alias` | `<stableAlias>` with `<stable objectTypeId behavesLike maxAnimals product allowAnimals strict>` | breeding boot query literal ` WHERE IsComplete =1 AND ObjectTypeID IN (133,134,143,144,517) AND (` at `0x7A1210` (68 chars, rewritten with the same length); parameter table in `.data` `0xACEB40` (11 dwords per record, `-1` terminated); getters `0x1B0EB0` isStable, `0x1B0D60` maxAnimals, `0x1B0D20` / `0x1B04D0` / `0x1B0410` numeric params, `0x1B07E0` product item; `CmBreedingManager::checkContainerLimits` `0x1AC440` |
+| `hook_workshop_buff` | `<workshopBuff>` with `<db>` and `<workshop objectTypeId radiusTiles multiplier abilityIds>` | `CmCreationManager::checkExceptionalChance` `0x1E46B0` (3rd arg is the GameConnection; `GameConnection::vftable` `0x782DA8`); `craftWithTool` `0x1E5820`; `GameConnection::getControlObject` `0x135C00` (Player = `**(conn+0xB38)`); `Geo::WorldToGeoId` `0x57AAE0`; Player char id stamp `+0x1B44`, cached geoId `+0x2464`; vanilla x1.2 constant `DAT_1407ace74` |
+| `hook_well_water` | `<wellWater>` with `<well objectTypeId amount itemTypeId>` | `AbilityImp::GetWater::_onDoPerform` `0x39F780` (ability 109); `Gathering::Manager::gather` `0x37B090` (item range `{0xCC = 204 Water}`, quantity 1) |
+| `hook_cart_places` | `<cartPlaces>` with `<cart objectTypeId / datablockId places>` | `AbilityImp::PutMovableInCart::_onDoPerform` `0x37E1D0`, compare `41 83 FE 0C 76 17` at `0x37E33A` (imm8 `0x37E33D`); `PullMovableFromCart::_onDoPerform` `0x37D880`; displayed maximum global int `0x81D3E0` (12); message id `2678`; hitched carts resolve by `AttachedShapeData` datablock id (707 = harnessed wood cart), object lookup `0x3E7750` |
+| `ability/hook_register_perform`, `hook_light_working_object`, `hook_resolve_light_object` | (diagnostic, observation only) | `AbilityImp::ServerManager::_registerPerform` `0x3B5D80`; `LightWorkingObject::_onDoPerform` `0x3A21F0`; light resolver `0x33DDB0` |
 
-## Crops (the most involved one)
+## How the crop hook fits together
 
-`hook_crop_types` only does the server-native part. A new crop also needs:
-
-* a server **seed/harvest item** type and a mod `dbChanges()` row for it,
-* a **client Sow ability** in `skill_types.xml` mirroring an existing crop's ability block under the new id (server and client copy),
-* one **substance + terrain material pair per growth stage** on the client (script data),
-* for wild gathering: rows in `gatherables.xml` (server and client), the new gatherable `type` ids, and the ability 68 `ent_req` description word list.
-
-`aliasBase` (optional) makes the new crop's substances behave like another vanilla crop's stage ids instead of Wheat's (for example carrots or grapes), which is what decides the look until the crop gets its own art.
+All eight vanilla crops (abilities 133-140) run through `BasePlantImp::_onDoPerform`. A new crop is a new ability id that reuses `PlantWheat_Ability`'s vtable (the object never hardcodes its own id), plus a row in the ability-id map and its own unused 10-wide substance block (`fertileSmall` odd = fertile, +2 per growth stage, six stages). The eight inlined range checks `(u8)(id-101) <= W-1` are widened in memory (vanilla `W = 75`, byte `0x4B`). Substance lookups for the new ids are remapped to Wheat's stage ids (or `aliasBase`) so ability requirement validation does not abort the boot with `invalid substance ter2ID`. A usable crop additionally needs a client Sow ability in `skill_types.xml`, substance/terrain material pairs per stage and the matching client-side support; for wild gathering also `gatherables.xml` rows and the ability 68 `gatherable_type` word list. `maxGatherableType` (218..254, default 218) raises the vanilla limit of 218 gatherable types; the client has five sites for the same limit.
 
 ## Things to know
 
-* The engine rewrites `objects_types` / `recipe` at boot from the seed SQL, then runs mod `dbChanges()` callbacks. New object types must be registered in a mod `dbChanges()` or baked into the seed SQL; a one-off manual INSERT is wiped at the next restart.
-* `sp_checkForeignKeys` runs **before** mod `dbChanges()`; a dangling reference to a mod-only type is a fatal boot error.
-* Steam file verification/updates restore the stock server exe and any patched client files. Re-apply the client-side patches after a verify.
-* `lfxe_key_data.h` is a local placeholder and is intentionally not part of this change (it is gitignored upstream).
+- New object types must be registered in a mod `dbChanges()` or baked into the seed SQL; the foreign-key check (`sp_checkForeignKeys`) runs before mod `dbChanges()`.
+- A newly built unsigned hook DLL is blocked by Windows Smart App Control (`0xc0e90002`); the server then boots without hooks and dies early on custom crop substances.
+- Steam file verification restores the stock server and client files.
+- `datablockRange` needs the equivalent client change; a client without it reports "Invalid packet (mounted images)" on the first carry.
 
-## Testing done
+## Status & provenance
 
-Each hook was verified in a running server with players: log lines at boot, in-game behaviour (sowing/harvesting, carrying movables with >1024 datablocks, cart capacity 30, well yield, workshop quality, stable restrictions, restart persistence of drying frames/tanning tubs), and a clean restart afterwards.
+Runtime-verified on a live server with players: `cropTypes` (five crops sown, grown and harvested; wild gathering of the new grains), `datablockRange` (carrying movable objects with more than 1024 datablock ids), `cartPlaces` (wood cart 30 places, horse carts unchanged at 12), `wellWater` (20 Water per use), `workshopBuff` (quality 33 -> 40 near a workshop, persisted item quality confirmed in the database), `herbGardenGate` (plant, early-craft refusal, collect, restart persistence), `greenhouseAlias` (restart persistence of drying frames and tanning tubs), `stableAlias` (capacity and allowed-animal rules). The vanilla Herbal Garden window cannot be shown for a new object type without client-side changes (the client selects the window by type id in `CmInventory::ShowComplexObjectInventory`), so `greenhouseAlias` with `behavesLike="1353"` only helps server-side behaviour. The light probes are observation-only. All RVAs are for the current Steam build of the YO dedicated server and must be re-verified after any game update.

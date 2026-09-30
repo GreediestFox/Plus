@@ -130,3 +130,5 @@ Following [`reverse_engineering.md`](reverse_engineering.md):
 
 - **`re`** — the class identity, ability gating, DB schema, and object/ability/recipe ids are read directly from `ddctd_cm_yo_server.exe` RTTI/strings and the server data files (`objects_types.xml`, `skill_types.xml`, `recipe.xml`, `sql/patch.sql`). **Verified** by those artifacts.
 - **Inferred / not yet done:** the exact processing semantics (whether the tub consumes its contents 1:1 over whatever is loaded vs. a fixed batch), and *all* RVAs — none are decompiled or recorded yet. Confirming the 1:1-over-contents behaviour and the output-type computation requires decompiling the `WorkingContainer` tick/finalize routine (step 3 above).
+
+See also: [`YO_SERVER_HOOKS.md`](YO_SERVER_HOOKS.md) - `greenhouseAlias` keeps custom drying frames and tanning tubs working across restarts (`behavesLike` 118 / 472) and `herbGardenGate` adds a timed plant/collect cycle.

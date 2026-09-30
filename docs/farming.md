@@ -91,3 +91,5 @@ quality = ceil((1 - 0.2 * weatherFactor) * soilQuality
 For good weather this is `ceil(0.6 * soilQuality + 40)`; for bad weather it is
 `ceil(0.9 * soilQuality + 10)`. Soil quality therefore changes item quality,
 not the number of items.
+
+See also: [`YO_SERVER_HOOKS.md`](YO_SERVER_HOOKS.md) - hooks that add extra farmable crops on the same sow/grow/harvest code and raise the gatherable type limit.

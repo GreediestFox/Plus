@@ -39,6 +39,7 @@
 #include "hooks/engine/hook_datablock_range.h"
 #include "hooks/engine/hook_crop_types.h"
 #include "hooks/engine/hook_well_water.h"
+#include "hooks/engine/hook_drink_effects.h"
 #include "hooks/engine/hook_herb_garden_gate.h"
 #include "hooks/engine/hook_gem_drop.h"
 #include "hooks/engine/hook_tunnel_drop.h"
@@ -207,6 +208,7 @@ void Lifx::Server::Init()
 		Hooks::Engine::ConfigureDatablockRange(root);
 		Hooks::Engine::ConfigureCropTypes(root);
 		Hooks::Engine::ConfigureWellWater(root);
+		Hooks::Engine::ConfigureDrinkEffects(root);
 		Hooks::Engine::ConfigureHerbGardenGate(root);
 		Hooks::Engine::ConfigureGemDrops(root);
 		Hooks::Engine::ConfigureTunnelDrops(root);
@@ -598,6 +600,7 @@ void Lifx::Server::AttachHooks()
 	Hooks::Engine::AttachDatablockRangeHook();
 	Hooks::Engine::AttachCropTypesHook();
 		Hooks::Engine::AttachWellWaterHook();
+		Hooks::Engine::AttachDrinkEffectsHook();
 	Hooks::Engine::AttachHerbGardenGateHooks();
 	Hooks::Engine::AttachGemDropHooks();
 	Hooks::Engine::AttachTunnelDropHook();

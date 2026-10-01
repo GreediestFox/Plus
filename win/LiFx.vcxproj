@@ -61,6 +61,7 @@
     <ClInclude Include="..\source\server\hooks\engine\hook_console.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_crop_types.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_datablock_range.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_drink_effects.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_filestream.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_gem_drop.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_greenhouse_alias.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="..\source\server\hooks\engine\hook_console.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_crop_types.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_datablock_range.cpp" />
+    <ClCompile Include="..\source\server\hooks\engine\hook_drink_effects.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_filestream.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_gem_drop.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_greenhouse_alias.cpp" />

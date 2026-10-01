@@ -212,4 +212,16 @@
     <crop abilityId="363" seedItemId="3751" fertileSmallSubstance="221" nonFertileSmallSubstance="222" aliasBase="161" name="Hops" />
     <crop abilityId="364" seedItemId="3752" fertileSmallSubstance="231" nonFertileSmallSubstance="232" aliasBase="141" name="Sugar Beet" />
 </cropTypes>
+    <!-- Drink effects: a buff and a drawback per drink type (player effect ids of cm_effects.xml, magnitude as in item_effects.Magnitude / 1000). -->
+    <drinkEffects enabled="1" verbose="1" dump="0">
+        <db host="127.0.0.1" port="3306" user="root" password="CHANGE_ME" name="lif_1" />
+        <drink objectTypeId="3920">   <!-- Thin Beer: Accelerated + Clumsiness -->
+            <effect id="6" magnitude="0.10" />
+            <effect id="7" magnitude="0.10" />
+        </drink>
+        <drink objectTypeId="3921">   <!-- Strong Beer: Swiftness + Slowed -->
+            <effect id="8" magnitude="0.20" />
+            <effect id="5" magnitude="0.20" />
+        </drink>
+    </drinkEffects>
 </cm_config>

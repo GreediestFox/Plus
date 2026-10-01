@@ -149,6 +149,9 @@
     <ClInclude Include="..\source\server\hooks\engine\hook_datablock_range.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_drink_effects.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_filestream.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
@@ -360,6 +363,9 @@
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_datablock_range.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_drink_effects.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_filestream.cpp">

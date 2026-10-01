@@ -152,6 +152,7 @@ build_lifx() {
         source/server/hooks/engine/hook_stable_alias.cpp
         source/server/hooks/engine/hook_cart_places.cpp
         source/server/hooks/engine/hook_well_water.cpp
+        source/server/hooks/engine/hook_drink_effects.cpp
         source/server/hooks/engine/hook_herb_garden_gate.cpp
         source/server/hooks/engine/hook_datablock_range.cpp
         source/server/hooks/engine/hook_crop_types.cpp

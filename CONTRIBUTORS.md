@@ -81,6 +81,7 @@ hooks for modded *Your Own* servers, plus the documentation for them:
   buff near configured workshops
 - `source/server/hooks/engine/hook_well_water.{h,cpp}` — water amount per
   "Get Water" action
+- `source/server/hooks/engine/hook_drink_effects.{h,cpp}` — buff and drawback effects per drink type
 - `source/server/hooks/engine/hook_cart_places.{h,cpp}` — per-cart-type
   "put in cart" capacity
 - `source/server/hooks/ability/hook_register_perform.{h,cpp}`,

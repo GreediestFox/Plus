@@ -60,6 +60,14 @@ typedef std::uint8_t*(__fastcall* HarvestItemOf_Fn)(LPVOID map, const std::uint8
 __CM_DECL_EXTERNAL(std::intptr_t, __fastcall, _SubstanceLookupByTer2Id, LPVOID mgr, std::uint8_t ter2Id);
 __CM_INSTATNTIATE(_SubstanceLookupByTer2Id);
 
+// AbilityImp::Inspect's "which seed item grows in this crop block" lookup, RVA 0x3A9700. Walks the crop record list
+// (fertileSmall/nonFertileSmall substance at +0x18/+0x19, seed item at +0x14) for the block's first substance id
+// (stage id - stage id % 10 + 1). Its only caller is AbilityImp::Inspect::_inspectEntity (RVA 0x395AC0), which
+// feeds it the block of the substance record it just looked up - for a custom crop that is the ALIASED (vanilla)
+// record, so without help it reports the alias target's item (e.g. Wheat for a custom grain).
+__CM_DECL_EXTERNAL(std::uint32_t, __fastcall, _InspectSeedItemOf, std::uint32_t blockFirstSubstance);
+__CM_INSTATNTIATE(_InspectSeedItemOf);
+
 namespace Hooks
 {
     namespace Engine
@@ -105,6 +113,13 @@ namespace Hooks
             // speed profile or harvest mechanics should follow a different vanilla crop than Wheat's.
             constexpr std::uintptr_t kSubstanceLookupByTer2IdRva = 0x572de0;
             constexpr std::uint8_t kWheatFertileSmallSubstance = 101;
+            constexpr std::uintptr_t kInspectSeedItemOfRva = 0x3a9700;
+
+            // Last alias applied by OnSubstanceLookupByTer2Id on this thread (0 = the last lookup was not aliased).
+            // Inspect calls the substance lookup and then _InspectSeedItemOf right after it on the same thread, so
+            // OnInspectSeedItemOf can swap the alias target's block back to the real crop's block.
+            thread_local std::uint8_t tlsLastRawCropSubstance = 0;
+            thread_local std::uint8_t tlsLastAliasSubstance = 0;
 
             struct CropDef
             {
@@ -242,9 +257,31 @@ namespace Hooks
                 {
                     std::uint8_t base = crop.fertileSmallSubstance;
                     if (ter2Id >= base && ter2Id < base + 6)
-                        return _SubstanceLookupByTer2Id(mgr, static_cast<std::uint8_t>(crop.aliasBase + (ter2Id - base)));
+                    {
+                        std::uint8_t alias = static_cast<std::uint8_t>(crop.aliasBase + (ter2Id - base));
+                        tlsLastRawCropSubstance = ter2Id;
+                        tlsLastAliasSubstance = alias;
+                        return _SubstanceLookupByTer2Id(mgr, alias);
+                    }
                 }
+                tlsLastRawCropSubstance = 0;
+                tlsLastAliasSubstance = 0;
                 return _SubstanceLookupByTer2Id(mgr, ter2Id);
+            }
+
+            std::uint32_t __fastcall OnInspectSeedItemOf(std::uint32_t blockFirstSubstance)
+            {
+                std::uint8_t raw = tlsLastRawCropSubstance, alias = tlsLastAliasSubstance;
+                tlsLastRawCropSubstance = 0;
+                tlsLastAliasSubstance = 0;
+                if (raw != 0 && blockFirstSubstance == static_cast<std::uint32_t>(alias - alias % 10 + 1))
+                {
+                    std::uint32_t own = static_cast<std::uint32_t>(raw - raw % 10 + 1);
+                    std::uint32_t item = _InspectSeedItemOf(own);
+                    if (item != 0)
+                        return item;
+                }
+                return _InspectSeedItemOf(blockFirstSubstance);
             }
         }
 
@@ -432,6 +469,19 @@ namespace Hooks
                 Lifx::ShowErrorMessage("DetourAttach failed for the crop-types substance-alias hook. Error: %ld", rc);
                 DetourDetach(&(PVOID&)_RegisterBuiltinAbilities, OnRegisterBuiltinAbilities);
                 return;
+            }
+
+            // Inspect shows the real crop's name instead of the alias target's (optional: skipped on mismatch).
+            static constexpr std::uint8_t inspectSeedItemPrologue[] = { 0x48, 0x8b, 0x15, 0x11, 0xf6, 0x7e, 0x00, 0x48, 0x8b, 0x02 };
+            if (std::memcmp(reinterpret_cast<const void*>(s.base + kInspectSeedItemOfRva), inspectSeedItemPrologue, sizeof(inspectSeedItemPrologue)) == 0)
+            {
+                _InspectSeedItemOf = reinterpret_cast<_InspectSeedItemOf_Fn>(s.base + kInspectSeedItemOfRva);
+                rc = DetourAttach(&(PVOID&)_InspectSeedItemOf, OnInspectSeedItemOf);
+                FileLog(rc == NO_ERROR ? "inspect crop-name fix attached" : "inspect crop-name fix NOT attached (DetourAttach %ld)", rc);
+            }
+            else
+            {
+                FileLog("inspect crop-name fix NOT attached: expected code not found at 0x3A9700");
             }
 
             s.attached = true;

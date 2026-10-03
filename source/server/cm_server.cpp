@@ -37,6 +37,7 @@
 #include "hooks/engine/hook_stable_alias.h"
 #include "hooks/engine/hook_cart_places.h"
 #include "hooks/engine/hook_datablock_range.h"
+#include "hooks/engine/hook_craft_effects_range.h"
 #include "hooks/engine/hook_crop_types.h"
 #include "hooks/engine/hook_well_water.h"
 #include "hooks/engine/hook_drink_effects.h"
@@ -206,6 +207,7 @@ void Lifx::Server::Init()
 		Hooks::Engine::ConfigureStableAlias(root);
 		Hooks::Engine::ConfigureCartPlaces(root);
 		Hooks::Engine::ConfigureDatablockRange(root);
+		Hooks::Engine::ConfigureCraftEffectsRange(root);
 		Hooks::Engine::ConfigureCropTypes(root);
 		Hooks::Engine::ConfigureWellWater(root);
 		Hooks::Engine::ConfigureDrinkEffects(root);
@@ -598,6 +600,7 @@ void Lifx::Server::AttachHooks()
 	Hooks::Engine::AttachStableAliasHook();
 		Hooks::Engine::AttachCartPlacesHook();
 	Hooks::Engine::AttachDatablockRangeHook();
+	Hooks::Engine::AttachCraftEffectsRangeHook();
 	Hooks::Engine::AttachCropTypesHook();
 		Hooks::Engine::AttachWellWaterHook();
 		Hooks::Engine::AttachDrinkEffectsHook();

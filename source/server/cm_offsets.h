@@ -505,4 +505,16 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- stableAlias (docs/yo_hooks/stable_alias.md) ----
+	STABLE_IS_STABLE                            = 0x1B0EB0,   // stable parameter getter: is stable
+	STABLE_MAX_ANIMALS                          = 0x1B0D60,   // stable parameter getter: max animals
+	STABLE_PARAM6                               = 0x1B04D0,   // stable parameter getter (numeric)
+	STABLE_PARAM7                               = 0x1B0D20,   // stable parameter getter (numeric)
+	STABLE_PARAM8                               = 0x1B0410,   // stable parameter getter (numeric)
+	STABLE_PRODUCT                              = 0x1B07E0,   // stable parameter getter: product item
+	STABLE_IS_ANIMAL                            = 0x1B0DA0,   // is-animal check
+	STABLE_CHECK_LIMITS                         = 0x1AC440,   // CmBreedingManager::checkContainerLimits
+	STABLE_PARAM_TABLE                          = 0xACEB40,   // stable parameter table (11 dwords per record, -1 terminated)
+	STABLE_BOOT_QUERY_LITERAL                   = 0x7A1210,   // breeding boot query literal " WHERE IsComplete =1 AND ObjectTypeID IN (133,134,143,144,517) AND ("
 };

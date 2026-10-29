@@ -134,6 +134,9 @@
     <ClInclude Include="..\source\server\hooks\engine\hook_gem_drop.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_patch_util.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_recipe_starting_tools.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
@@ -141,6 +144,9 @@
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_tunnel_drop.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_workshop_buff.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\furnace\engine_internals.h">
@@ -318,6 +324,9 @@
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_tunnel_drop.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_workshop_buff.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\furnace\hook_brewing_tank_desc.cpp">

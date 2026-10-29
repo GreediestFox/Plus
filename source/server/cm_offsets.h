@@ -505,4 +505,8 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- workshopBuff (docs/yo_hooks/workshop_buff.md) ----
+	WORKSHOP_CHECK_EXCEPTIONAL_CHANCE           = 0x1E46B0,   // CmCreationManager::checkExceptionalChance
+	GEO_WORLD_TO_GEO_ID                         = 0x57AAE0,   // Geo::WorldToGeoId(U32* outGeoId, const float* worldPos)
 };

@@ -136,13 +136,26 @@ build_lifx() {
         source/server/api/lifx_dispatcher.cpp
         source/server/api/lifx_hostile.cpp
         source/server/api/lifx_battlezone.cpp
+        source/server/api/lifx_geo.cpp
         source/server/cm_server.cpp
+        source/server/hooks/ability/hook_light_working_object.cpp
+        source/server/hooks/ability/hook_register_perform.cpp
+        source/server/hooks/ability/hook_resolve_light_object.cpp
         source/server/hooks/engine/hook_console.cpp
         source/server/hooks/engine/hook_filestream.cpp
         source/server/hooks/engine/hook_recipe_starting_tools.cpp
         source/server/hooks/engine/hook_gem_drop.cpp
         source/server/hooks/engine/hook_tunnel_drop.cpp
         source/server/hooks/engine/hook_tree_drop.cpp
+        source/server/hooks/engine/hook_workshop_buff.cpp
+        source/server/hooks/engine/hook_greenhouse_alias.cpp
+        source/server/hooks/engine/hook_stable_alias.cpp
+        source/server/hooks/engine/hook_cart_places.cpp
+        source/server/hooks/engine/hook_well_water.cpp
+        source/server/hooks/engine/hook_drink_effects.cpp
+        source/server/hooks/engine/hook_herb_garden_gate.cpp
+        source/server/hooks/engine/hook_datablock_range.cpp
+        source/server/hooks/engine/hook_crop_types.cpp
         source/server/hooks/furnace/hook_proc_desc.cpp
         source/server/hooks/furnace/hook_working_furnace_tick.cpp
         source/server/hooks/furnace/hook_brewing_tank_tick.cpp

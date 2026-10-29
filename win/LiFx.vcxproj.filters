@@ -47,6 +47,9 @@
     <ClInclude Include="..\source\server\api\lifx_effects.h">
       <Filter>Server\API</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\server\api\lifx_geo.h">
+      <Filter>Server\API</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\server\api\lifx_hostile.h">
       <Filter>Server\API</Filter>
     </ClInclude>
@@ -70,6 +73,15 @@
     </ClInclude>
     <ClInclude Include="..\source\server\cm_wrappers.h">
       <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\ability\hook_light_working_object.h">
+      <Filter>Server\Hooks\Ability</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\ability\hook_register_perform.h">
+      <Filter>Server\Hooks\Ability</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\ability\hook_resolve_light_object.h">
+      <Filter>Server\Hooks\Ability</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\ai\hook_behavior_node.h">
       <Filter>Server\Hooks\AI</Filter>
@@ -125,7 +137,19 @@
     <ClInclude Include="..\source\server\hooks\effect\hook_effect_parse.h">
       <Filter>Server\Hooks\Effect</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_cart_places.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_console.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_crop_types.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_datablock_range.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_drink_effects.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_filestream.h">
@@ -134,13 +158,28 @@
     <ClInclude Include="..\source\server\hooks\engine\hook_gem_drop.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_greenhouse_alias.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_herb_garden_gate.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_recipe_starting_tools.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_stable_alias.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_tree_drop.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\engine\hook_tunnel_drop.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_well_water.h">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\server\hooks\engine\hook_workshop_buff.h">
       <Filter>Server\Hooks\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\source\server\hooks\furnace\engine_internals.h">
@@ -233,6 +272,9 @@
     <ClCompile Include="..\source\server\api\lifx_effects.cpp">
       <Filter>Server\API</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\server\api\lifx_geo.cpp">
+      <Filter>Server\API</Filter>
+    </ClCompile>
     <ClCompile Include="..\source\server\api\lifx_hostile.cpp">
       <Filter>Server\API</Filter>
     </ClCompile>
@@ -247,6 +289,15 @@
     </ClCompile>
     <ClCompile Include="..\source\server\cm_server.cpp">
       <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\ability\hook_light_working_object.cpp">
+      <Filter>Server\Hooks\Ability</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\ability\hook_register_perform.cpp">
+      <Filter>Server\Hooks\Ability</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\ability\hook_resolve_light_object.cpp">
+      <Filter>Server\Hooks\Ability</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\ai\hook_behavior_node.cpp">
       <Filter>Server\Hooks\AI</Filter>
@@ -302,7 +353,19 @@
     <ClCompile Include="..\source\server\hooks\effect\hook_effect_parse.cpp">
       <Filter>Server\Hooks\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_cart_places.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_console.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_crop_types.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_datablock_range.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_drink_effects.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_filestream.cpp">
@@ -311,13 +374,28 @@
     <ClCompile Include="..\source\server\hooks\engine\hook_gem_drop.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_greenhouse_alias.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_herb_garden_gate.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_recipe_starting_tools.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_stable_alias.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_tree_drop.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\engine\hook_tunnel_drop.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_well_water.cpp">
+      <Filter>Server\Hooks\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\server\hooks\engine\hook_workshop_buff.cpp">
       <Filter>Server\Hooks\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\source\server\hooks\furnace\hook_brewing_tank_desc.cpp">
@@ -387,6 +465,9 @@
     </Filter>
     <Filter Include="Server\Hooks\AI">
       <UniqueIdentifier>{fcf38eaf-a3ea-57ed-88ba-f524b51a0fb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Hooks\Ability">
+      <UniqueIdentifier>{7a45b5f6-698e-59bb-ab6b-0cc664b0385d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Hooks\Battlezone">
       <UniqueIdentifier>{4adac3a7-7af3-59af-804e-ee2a8966253a}</UniqueIdentifier>

@@ -505,4 +505,102 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- entity -> object cast (hooks/engine/hook_entity_util.h) ----
+	ENGINE_RT_DYNAMIC_CAST                      = 0x6E0FF2,   // MSVC __RTDynamicCast thunk
+	RTTI_SIM_OBJECT_TYPE_DESCRIPTOR             = 0xAF0DB8,   // SimObject::RTTI_Type_Descriptor (source type of the entity cast)
+	RTTI_COMPLEX_OBJECT_ENTITY_TYPE_DESCRIPTOR  = 0xB05D78,   // ComplexObject_Entity::RTTI_Type_Descriptor
+
+	// ---- craftEffectsRange (docs/YO_SERVER_HOOKS.md) ----
+	CRAFT_EFFECTS_ID_CHECK                      = 0x4DAC33,   // CraftItemEffectsManager::init: cmp ecx,25h (id - 1 <= 37)
+	CRAFT_EFFECTS_INDEX_CHECK                   = 0x4DAC3F,   // CraftItemEffectsManager::init: cmp dil,26h (index < 38)
+
+	// ---- cartPlaces (docs/YO_SERVER_HOOKS.md) ----
+	CART_PUT_IN_CART                            = 0x37E1D0,   // AbilityImp::PutMovableInCart::_onDoPerform
+	CART_PULL_FROM_CART                         = 0x37D880,   // AbilityImp::PullMovableFromCart::_onDoPerform
+	CART_COMPARE_IMM                            = 0x37E33D,   // imm8 of `cmp r14d,0Ch` (41 83 FE 0C) at 0x37E33A
+	CART_MAX_DISPLAY                            = 0x81D3E0,   // global int, the maximum printed by message 2678
+	ENGINE_OBJECT_BY_ID                         = 0x3E7750,   // (u32 id) -> Object* from the global id map (AttachedObject_Entity+8 holds the id)
+	ENGINE_OBJECT_FROM_ENTITY                   = 0x33DDB0,   // generic entity -> object lookup: (ComplexObject_Entity*, shared_ptr<Object>* out). Only ever give it a ComplexObject_Entity* (see hook_entity_util.h)
+	ENGINE_RELEASE_SHARED_REF                   = 0x86D60,   // shared_ptr release (control block at +8)
+
+	// ---- stableAlias (docs/YO_SERVER_HOOKS.md) ----
+	STABLE_IS_STABLE                            = 0x1B0EB0,   // stable parameter getter: is stable
+	STABLE_MAX_ANIMALS                          = 0x1B0D60,   // stable parameter getter: max animals
+	STABLE_PARAM6                               = 0x1B04D0,   // stable parameter getter (numeric)
+	STABLE_PARAM7                               = 0x1B0D20,   // stable parameter getter (numeric)
+	STABLE_PARAM8                               = 0x1B0410,   // stable parameter getter (numeric)
+	STABLE_PRODUCT                              = 0x1B07E0,   // stable parameter getter: product item
+	STABLE_IS_ANIMAL                            = 0x1B0DA0,   // is-animal check
+	STABLE_CHECK_LIMITS                         = 0x1AC440,   // CmBreedingManager::checkContainerLimits
+	STABLE_PARAM_TABLE                          = 0xACEB40,   // stable parameter table (11 dwords per record, -1 terminated)
+	STABLE_BOOT_QUERY_LITERAL                   = 0x7A1210,   // breeding boot query literal " WHERE IsComplete =1 AND ObjectTypeID IN (133,134,143,144,517) AND ("
+
+	// ---- wellWater (docs/YO_SERVER_HOOKS.md) ----
+	WELL_GET_WATER                              = 0x39F780,   // AbilityImp::GetWater::_onDoPerform
+	WELL_GATHER                                 = 0x37B090,   // Gathering::Manager::gather
+
+	// ---- workshopBuff (docs/YO_SERVER_HOOKS.md) ----
+	WORKSHOP_CHECK_EXCEPTIONAL_CHANCE           = 0x1E46B0,   // CmCreationManager::checkExceptionalChance
+	GEO_WORLD_TO_GEO_ID                         = 0x57AAE0,   // Geo::WorldToGeoId(U32* outGeoId, const float* worldPos)
+
+	// ---- greenhouseAlias (docs/YO_SERVER_HOOKS.md) ----
+	CRAFTWORK_LOAD_OBJECTS                      = 0x1D8E20,   // CmCraftworkManager::loadObjects
+	ENTITY_GET_TYPE_INFO                        = 0xC9930,   // Entity::GetTypeInfo (mov rax,[rcx+370h]; ret)
+	WC_DO_PERFORM                               = 0x3A0F60,   // AbilityBaseWC::_onDoPerform
+	TYPE_IS_DESCENDANT                          = 0x27EB30,   // Type "is descendant of" helper
+	GREENHOUSE_OPEN_CHECK_CALL                  = 0x38641D,   // call IsDescendant(type, 0x575, 100) in the open-inventory check
+	GREENHOUSE_OPEN_CHECK_RETURN                = 0x386422,   // return address of the call above
+	WC_FIND_RECIPE                              = 0x30BEE0,   // working-container recipe finder
+	GREENHOUSE_USE_ENTRY_TYPE_CALL_RETURN       = 0x1D9225,   // return address of the `call 0xC9930` inside the greenhouse use entry
+	GREENHOUSE_USE_ENTRY_TYPE_CALL              = 0x1D9220,   // `call 0xC9930` (E8 rel32) inside the greenhouse use entry
+
+	// ---- herbGardenGate (docs/YO_SERVER_HOOKS.md) ----
+	CREATION_CRAFT_WITH_DEVICE                  = 0x1E4B10,   // CmCreationManager::craftWithDevice
+	CREATION_FINALLY_MAKE_ITEM                  = 0x1E3C60,   // CmCreationManager::_finallyMakeItem
+	ABILITY_GET_DURATION                        = 0x31B3F0,   // Ability::GetDuration
+	ENGINE_SEND_MESSAGE                         = 0x8CC10,   // message helper (connection, message id, 0, 0)
+	WORKING_START                               = 0x1D9E40,   // (mgr, Object*, int ms): timer + row + State_Working
+	WORKING_FINISH                              = 0x1D9AB0,   // (mgr, Object*): timer off + row deleted + State_Complete
+	WORKING_MANAGER_GLOBAL                      = 0xB84E20,   // global pointer to the CmCraftworkManager
+
+	// ---- cropTypes (docs/YO_SERVER_HOOKS.md) ----
+	CROP_REGISTER_BUILTIN_ABILITIES             = 0x31D040,   // AbilityManager: register all built-in abilities
+	CROP_BASE_ABILITY_INIT                      = 0x317020,   // AbilityImp base-object init
+	CROP_REGISTER_ABILITY                       = 0x327D20,   // AbilityManager::_registerAbility
+	CROP_RECORD_OF                              = 0x3A95C0,   // crop record get-or-insert by ability id
+	CROP_MAP                                    = 0xB98D10,   // crop record map (global)
+	CROP_HARVEST_ITEM_OF                        = 0x3A94A0,   // harvest item get-or-insert by substance id
+	CROP_HARVEST_ITEM_MAP                       = 0xB98D50,   // harvest item map (global)
+	CROP_PLANT_WHEAT_VTABLE                     = 0x7F7A10,   // PlantWheat_Ability vtable, reused for every new crop
+	CROP_SUBSTANCE_LOOKUP                       = 0x572DE0,   // Geo::SubstanceManager ter2id lookup
+	CROP_INSPECT_SEED_ITEM_OF                   = 0x3A9700,   // AbilityImp::Inspect seed item lookup
+	CROP_RANGE_CHECK_0                          = 0x26EE5A,   // inlined growable-substance range check `cmp al,imm8` (CropsMaintenance)
+	CROP_RANGE_CHECK_1                          = 0x26EF8E,   // as above
+	CROP_RANGE_CHECK_2                          = 0x26F088,   // as above
+	CROP_RANGE_CHECK_3                          = 0x26F1CE,   // as above
+	CROP_RANGE_CHECK_4                          = 0x26F576,   // as above
+	CROP_RANGE_CHECK_5                          = 0x26FB03,   // as above
+	CROP_RANGE_CHECK_6                          = 0x270084,   // as above
+	CROP_RANGE_CHECK_7                          = 0x2700F7,   // as above
+	CROP_GATHERABLE_LIMIT_0                     = 0x3796D8,   // gatherables.cpp accessor: cmp ecx,0DAh
+	CROP_GATHERABLE_LIMIT_1                     = 0x379758,   // gatherables.cpp accessor: cmp ecx,0DAh
+	CROP_GATHERABLE_LIMIT_2                     = 0x3797C8,   // gatherables.cpp accessor: cmp ecx,0DAh
+	CROP_GATHERABLE_IS_VALID                    = 0x379A00,   // gatherables.cpp isValid(type), first instruction cmp ecx,0DAh
+
+	// ---- datablockRange (docs/YO_SERVER_HOOKS.md) ----
+	DATABLOCK_COUNTER_START_IMM                 = 0xCEC86,   // Complex::ObjectType::TypeStorage ctor: mov dword ptr [rcx+8], 320h (imm32)
+	DATABLOCK_WRITE_MAX_IMM                     = 0x13372B,   // ghost pack: mov r9d, 402h (imm32) before the ranged write of a datablock id
+	DATABLOCK_READ_MAX_IMM                      = 0x133D24,   // ghost unpack: mov r8d, 402h (imm32) before the ranged read
+	DATABLOCK_DYN_FIRST_IMM                     = 0x4297F7,   // Sim init: mov ecx, 443h (imm32)
+	DATABLOCK_DYN_COUNTER_VAR                   = 0xBC8FD4,   // global next-object-id counter (int)
+	DATABLOCK_ID_BITS_IMM1                      = 0x11D7D8,   // mov r8d, 0Ah (imm32): writeInt(id - 3, 10 bits), mounted images
+	DATABLOCK_ID_BITS_IMM2                      = 0x1389B6,   // mov r8d, 0Ah (imm32): writeInt(datablock id - 3, 10 bits)
+
+	// ---- drinkEffects (docs/YO_SERVER_HOOKS.md) ----
+	DRINK_APPLY_POTION                          = 0x1C4A40,   // CharacterSaveableEffects::applyPotionItemEffect
+	DRINK_ADD_EFFECT                            = 0x1C3AA0,   // core add-effect (fx, effectId, float value, int durationMs, int 0)
+	DRINK_GET_EFFECTS_FEATURE                   = 0x27C040,   // (item) -> ItemEffectsFeature* or null
+	DRINK_DURATION_CONST_A                      = 0x736568,   // float 1000.0
+	DRINK_DURATION_CONST_B                      = 0x73AB8C,   // float 15.0
 };

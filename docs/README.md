@@ -76,6 +76,7 @@ LiFx is a Detours-based extension framework for the *Life is Feudal: Your Own* d
 | [Outposts](outposts.md) | 🔬 | Outpost/claim radius system and the proximity rules between outposts, monuments, and personal claims. |
 | [Bloomery & furnace/recipe system](bloomery.md) | ✅ | Full furnace/recipe system: `recalcTick` walkthrough, the 59-row proc-descriptor table, bloomery whitelist, kiln/vostaskus cycles, and hook recipes. |
 | [Craftwork working-containers (tanning tub)](craftwork_containers.md) | 🔬 | The tanning tub (type 472, `WorkingContainer`/`CmCraftworkManager`, `UseTanningTube` id 85): the last unhooked craftwork leaf, why its output type/quantity is engine-computed not data, and the RE-to-hook path. |
+| [YO server engine hooks](YO_SERVER_HOOKS.md) | 🔬 | Config-driven hooks for modded *Your Own* servers: extra farmable crops and gatherable limit, wider datablock id range, greenhouse/stable aliases, herb-garden time gate, workshop quality buff, cart places and well water; RVA table and how-to. |
 | [Effects & abilities](effects_and_abilities.md) | 🔬 | Effect/ability subsystem: effect-XML parser at RVA 0x4DD100, the 311 `*_Ability` RTTI classes, and hookable seams. |
 | [Encrypted assets (LFXE)](dts_encryption.md) | ✅ | LFXE encrypted assets: the universal FileStream decrypt hook, the ChaCha20 container format, the key path, and the packer. |
 | [Universal LFXE hook RE](lfxe_texture_re.md) | 🔬 | RE behind the universal LFXE hook (#116): FileStream as the single seam, the disproved mmap hypothesis, and both-binary offsets. |

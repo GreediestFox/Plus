@@ -505,4 +505,28 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- cropTypes (docs/yo_hooks/crop_types.md) ----
+	CROP_REGISTER_BUILTIN_ABILITIES             = 0x31D040,   // AbilityManager: register all built-in abilities
+	CROP_BASE_ABILITY_INIT                      = 0x317020,   // AbilityImp base-object init
+	CROP_REGISTER_ABILITY                       = 0x327D20,   // AbilityManager::_registerAbility
+	CROP_RECORD_OF                              = 0x3A95C0,   // crop record get-or-insert by ability id
+	CROP_MAP                                    = 0xB98D10,   // crop record map (global)
+	CROP_HARVEST_ITEM_OF                        = 0x3A94A0,   // harvest item get-or-insert by substance id
+	CROP_HARVEST_ITEM_MAP                       = 0xB98D50,   // harvest item map (global)
+	CROP_PLANT_WHEAT_VTABLE                     = 0x7F7A10,   // PlantWheat_Ability vtable, reused for every new crop
+	CROP_SUBSTANCE_LOOKUP                       = 0x572DE0,   // Geo::SubstanceManager ter2id lookup
+	CROP_INSPECT_SEED_ITEM_OF                   = 0x3A9700,   // AbilityImp::Inspect seed item lookup
+	CROP_RANGE_CHECK_0                          = 0x26EE5A,   // inlined growable-substance range check `cmp al,imm8` (CropsMaintenance)
+	CROP_RANGE_CHECK_1                          = 0x26EF8E,   // as above
+	CROP_RANGE_CHECK_2                          = 0x26F088,   // as above
+	CROP_RANGE_CHECK_3                          = 0x26F1CE,   // as above
+	CROP_RANGE_CHECK_4                          = 0x26F576,   // as above
+	CROP_RANGE_CHECK_5                          = 0x26FB03,   // as above
+	CROP_RANGE_CHECK_6                          = 0x270084,   // as above
+	CROP_RANGE_CHECK_7                          = 0x2700F7,   // as above
+	CROP_GATHERABLE_LIMIT_0                     = 0x3796D8,   // gatherables.cpp accessor: cmp ecx,0DAh
+	CROP_GATHERABLE_LIMIT_1                     = 0x379758,   // gatherables.cpp accessor: cmp ecx,0DAh
+	CROP_GATHERABLE_LIMIT_2                     = 0x3797C8,   // gatherables.cpp accessor: cmp ecx,0DAh
+	CROP_GATHERABLE_IS_VALID                    = 0x379A00,   // gatherables.cpp isValid(type), first instruction cmp ecx,0DAh
 };

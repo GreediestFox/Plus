@@ -32,6 +32,7 @@
 #include "hooks/character/hook_set_control_object.h"
 #include "hooks/character/hook_npcdec_pack.h"
 #include "hooks/engine/hook_recipe_starting_tools.h"
+#include "hooks/engine/hook_craft_effects_range.h"
 #include "hooks/engine/hook_gem_drop.h"
 #include "hooks/engine/hook_tunnel_drop.h"
 #include "hooks/engine/hook_tree_drop.h"
@@ -175,6 +176,7 @@ void Lifx::Server::Init()
 	{
 		const tinyxml2::XMLElement* root = xml_doc.RootElement();
 		Hooks::Engine::ConfigureRecipeStartingTools(root);
+		Hooks::Engine::ConfigureCraftEffectsRange(root);
 		Hooks::Engine::ConfigureGemDrops(root);
 		Hooks::Engine::ConfigureTunnelDrops(root);
 		Hooks::Engine::ConfigureTreeDrops(root);
@@ -552,6 +554,10 @@ void Lifx::Server::AttachHooks()
 	// trampoline rather than going through Detours, so it must NOT be inside
 	// the transaction above.
 	Hooks::Engine::AttachTreeDropHook();
+
+	// craft_effects_range: attached after the main transaction has committed, so it is never part of
+	// (and cannot poison) that shared transaction.
+	Hooks::Engine::AttachCraftEffectsRangeHook();
 
 	if (commitRc != NO_ERROR) {
 		Con::Warning("[lifx] DetourTransactionCommit FAILED rc=%ld — none of the above hooks are active", (long)commitRc);

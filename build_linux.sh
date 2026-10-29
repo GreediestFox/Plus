@@ -143,6 +143,7 @@ build_lifx() {
         source/server/hooks/engine/hook_gem_drop.cpp
         source/server/hooks/engine/hook_tunnel_drop.cpp
         source/server/hooks/engine/hook_tree_drop.cpp
+        source/server/hooks/engine/hook_craft_effects_range.cpp
         source/server/hooks/furnace/hook_proc_desc.cpp
         source/server/hooks/furnace/hook_working_furnace_tick.cpp
         source/server/hooks/furnace/hook_brewing_tank_tick.cpp

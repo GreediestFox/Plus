@@ -505,4 +505,8 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- craftEffectsRange (docs/yo_hooks/craft_effects_range.md) ----
+	CRAFT_EFFECTS_ID_CHECK                      = 0x4DAC33,   // CraftItemEffectsManager::init: cmp ecx,25h (id - 1 <= 37)
+	CRAFT_EFFECTS_INDEX_CHECK                   = 0x4DAC3F,   // CraftItemEffectsManager::init: cmp dil,26h (index < 38)
 };

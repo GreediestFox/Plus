@@ -53,9 +53,12 @@
     <ClInclude Include="..\source\server\hooks\effect\hook_assign_effect.h" />
     <ClInclude Include="..\source\server\hooks\effect\hook_broadcast_effects.h" />
     <ClInclude Include="..\source\server\hooks\effect\hook_effect_parse.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_cart_places.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_console.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_entity_util.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_filestream.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_gem_drop.h" />
+    <ClInclude Include="..\source\server\hooks\engine\hook_patch_util.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_recipe_starting_tools.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_tree_drop.h" />
     <ClInclude Include="..\source\server\hooks\engine\hook_tunnel_drop.h" />
@@ -114,6 +117,7 @@
     <ClCompile Include="..\source\server\hooks\effect\hook_assign_effect.cpp" />
     <ClCompile Include="..\source\server\hooks\effect\hook_broadcast_effects.cpp" />
     <ClCompile Include="..\source\server\hooks\effect\hook_effect_parse.cpp" />
+    <ClCompile Include="..\source\server\hooks\engine\hook_cart_places.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_console.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_filestream.cpp" />
     <ClCompile Include="..\source\server\hooks\engine\hook_gem_drop.cpp" />

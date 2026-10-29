@@ -505,4 +505,18 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- entity -> object cast (hooks/engine/hook_entity_util.h) ----
+	ENGINE_RT_DYNAMIC_CAST                      = 0x6E0FF2,   // MSVC __RTDynamicCast thunk
+	RTTI_SIM_OBJECT_TYPE_DESCRIPTOR             = 0xAF0DB8,   // SimObject::RTTI_Type_Descriptor (source type of the entity cast)
+	RTTI_COMPLEX_OBJECT_ENTITY_TYPE_DESCRIPTOR  = 0xB05D78,   // ComplexObject_Entity::RTTI_Type_Descriptor
+
+	// ---- cartPlaces (docs/yo_hooks/cart_places.md) ----
+	CART_PUT_IN_CART                            = 0x37E1D0,   // AbilityImp::PutMovableInCart::_onDoPerform
+	CART_PULL_FROM_CART                         = 0x37D880,   // AbilityImp::PullMovableFromCart::_onDoPerform
+	CART_COMPARE_IMM                            = 0x37E33D,   // imm8 of `cmp r14d,0Ch` (41 83 FE 0C) at 0x37E33A
+	CART_MAX_DISPLAY                            = 0x81D3E0,   // global int, the maximum printed by message 2678
+	ENGINE_OBJECT_BY_ID                         = 0x3E7750,   // (u32 id) -> Object* from the global id map (AttachedObject_Entity+8 holds the id)
+	ENGINE_OBJECT_FROM_ENTITY                   = 0x33DDB0,   // generic entity -> object lookup: (ComplexObject_Entity*, shared_ptr<Object>* out). Only ever give it a ComplexObject_Entity* (see hook_entity_util.h)
+	ENGINE_RELEASE_SHARED_REF                   = 0x86D60,   // shared_ptr release (control block at +8)
 };

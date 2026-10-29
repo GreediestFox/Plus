@@ -505,4 +505,15 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- entity -> object cast (hooks/engine/hook_entity_util.h) ----
+	ENGINE_RT_DYNAMIC_CAST                      = 0x6E0FF2,   // MSVC __RTDynamicCast thunk
+	RTTI_SIM_OBJECT_TYPE_DESCRIPTOR             = 0xAF0DB8,   // SimObject::RTTI_Type_Descriptor (source type of the entity cast)
+	RTTI_COMPLEX_OBJECT_ENTITY_TYPE_DESCRIPTOR  = 0xB05D78,   // ComplexObject_Entity::RTTI_Type_Descriptor
+
+	// ---- wellWater (docs/yo_hooks/well_water.md) ----
+	WELL_GET_WATER                              = 0x39F780,   // AbilityImp::GetWater::_onDoPerform
+	WELL_GATHER                                 = 0x37B090,   // Gathering::Manager::gather
+	ENGINE_OBJECT_FROM_ENTITY                   = 0x33DDB0,   // generic entity -> object lookup: (ComplexObject_Entity*, shared_ptr<Object>* out). Only ever give it a ComplexObject_Entity* (see hook_entity_util.h)
+	ENGINE_RELEASE_SHARED_REF                   = 0x86D60,   // shared_ptr release (control block at +8)
 };

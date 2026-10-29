@@ -505,4 +505,22 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- entity -> object cast (hooks/engine/hook_entity_util.h) ----
+	ENGINE_RT_DYNAMIC_CAST                      = 0x6E0FF2,   // MSVC __RTDynamicCast thunk
+	RTTI_SIM_OBJECT_TYPE_DESCRIPTOR             = 0xAF0DB8,   // SimObject::RTTI_Type_Descriptor (source type of the entity cast)
+	RTTI_COMPLEX_OBJECT_ENTITY_TYPE_DESCRIPTOR  = 0xB05D78,   // ComplexObject_Entity::RTTI_Type_Descriptor
+
+	// ---- greenhouseAlias (docs/yo_hooks/greenhouse_alias.md) ----
+	CRAFTWORK_LOAD_OBJECTS                      = 0x1D8E20,   // CmCraftworkManager::loadObjects
+	ENTITY_GET_TYPE_INFO                        = 0xC9930,   // Entity::GetTypeInfo (mov rax,[rcx+370h]; ret)
+	WC_DO_PERFORM                               = 0x3A0F60,   // AbilityBaseWC::_onDoPerform
+	TYPE_IS_DESCENDANT                          = 0x27EB30,   // Type "is descendant of" helper
+	GREENHOUSE_OPEN_CHECK_CALL                  = 0x38641D,   // call IsDescendant(type, 0x575, 100) in the open-inventory check
+	GREENHOUSE_OPEN_CHECK_RETURN                = 0x386422,   // return address of the call above
+	WC_FIND_RECIPE                              = 0x30BEE0,   // working-container recipe finder
+	GREENHOUSE_USE_ENTRY_TYPE_CALL_RETURN       = 0x1D9225,   // return address of the `call 0xC9930` inside the greenhouse use entry
+	GREENHOUSE_USE_ENTRY_TYPE_CALL              = 0x1D9220,   // `call 0xC9930` (E8 rel32) inside the greenhouse use entry
+	ENGINE_OBJECT_FROM_ENTITY                   = 0x33DDB0,   // generic entity -> object lookup: (ComplexObject_Entity*, shared_ptr<Object>* out). Only ever give it a ComplexObject_Entity* (see hook_entity_util.h)
+	ENGINE_RELEASE_SHARED_REF                   = 0x86D60,   // shared_ptr release (control block at +8)
 };

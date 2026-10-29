@@ -509,4 +509,20 @@ enum CmOffset : U32
 	// ---- workshopBuff (docs/yo_hooks/workshop_buff.md) ----
 	WORKSHOP_CHECK_EXCEPTIONAL_CHANCE           = 0x1E46B0,   // CmCreationManager::checkExceptionalChance
 	GEO_WORLD_TO_GEO_ID                         = 0x57AAE0,   // Geo::WorldToGeoId(U32* outGeoId, const float* worldPos)
+
+	// ---- entity -> object cast (hooks/engine/hook_entity_util.h) ----
+	ENGINE_RT_DYNAMIC_CAST                      = 0x6E0FF2,   // MSVC __RTDynamicCast thunk
+	RTTI_SIM_OBJECT_TYPE_DESCRIPTOR             = 0xAF0DB8,   // SimObject::RTTI_Type_Descriptor (source type of the entity cast)
+	RTTI_COMPLEX_OBJECT_ENTITY_TYPE_DESCRIPTOR  = 0xB05D78,   // ComplexObject_Entity::RTTI_Type_Descriptor
+
+	// ---- herbGardenGate (docs/yo_hooks/herb_garden_gate.md) ----
+	CREATION_CRAFT_WITH_DEVICE                  = 0x1E4B10,   // CmCreationManager::craftWithDevice
+	CREATION_FINALLY_MAKE_ITEM                  = 0x1E3C60,   // CmCreationManager::_finallyMakeItem
+	ABILITY_GET_DURATION                        = 0x31B3F0,   // Ability::GetDuration
+	ENGINE_SEND_MESSAGE                         = 0x8CC10,   // message helper (connection, message id, 0, 0)
+	WORKING_START                               = 0x1D9E40,   // (mgr, Object*, int ms): timer + row + State_Working
+	WORKING_FINISH                              = 0x1D9AB0,   // (mgr, Object*): timer off + row deleted + State_Complete
+	WORKING_MANAGER_GLOBAL                      = 0xB84E20,   // global pointer to the CmCraftworkManager
+	ENGINE_OBJECT_FROM_ENTITY                   = 0x33DDB0,   // generic entity -> object lookup: (ComplexObject_Entity*, shared_ptr<Object>* out). Only ever give it a ComplexObject_Entity* (see hook_entity_util.h)
+	ENGINE_RELEASE_SHARED_REF                   = 0x86D60,   // shared_ptr release (control block at +8)
 };

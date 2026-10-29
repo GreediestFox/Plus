@@ -32,6 +32,7 @@
 #include "hooks/character/hook_set_control_object.h"
 #include "hooks/character/hook_npcdec_pack.h"
 #include "hooks/engine/hook_recipe_starting_tools.h"
+#include "hooks/engine/hook_herb_garden_gate.h"
 #include "hooks/engine/hook_workshop_buff.h"
 #include "hooks/engine/hook_gem_drop.h"
 #include "hooks/engine/hook_tunnel_drop.h"
@@ -176,6 +177,7 @@ void Lifx::Server::Init()
 	{
 		const tinyxml2::XMLElement* root = xml_doc.RootElement();
 		Hooks::Engine::ConfigureRecipeStartingTools(root);
+		Hooks::Engine::ConfigureHerbGardenGate(root);
 		Hooks::Engine::ConfigureWorkshopBuff(root);
 		Hooks::Engine::ConfigureGemDrops(root);
 		Hooks::Engine::ConfigureTunnelDrops(root);
@@ -555,6 +557,10 @@ void Lifx::Server::AttachHooks()
 	// the transaction above.
 	Hooks::Engine::AttachTreeDropHook();
 
+	// herb_garden_gate: attached after the main transaction has committed, so it is never part of
+	// (and cannot poison) that shared transaction.
+	Hooks::Engine::AttachHerbGardenGateHooks();
+
 	// workshop_buff: attached after the main transaction has committed, so it is never part of
 	// (and cannot poison) that shared transaction.
 	Hooks::Engine::AttachWorkshopBuffHook();
@@ -686,6 +692,7 @@ void Lifx::Server::DetachHooks()
 #endif
 
 	// Hooks with their own Detours transaction (detaching cannot nest inside the one below).
+	Hooks::Engine::DetachHerbGardenGateHooks();
 	Hooks::Engine::DetachWorkshopBuffHook();
 
 	DetourTransactionBegin();

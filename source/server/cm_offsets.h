@@ -505,4 +505,11 @@ enum CmOffset : U32
 	// this to capture the grave (type 1070) container pointer, then after the move
 	// clear +0x14 and call it again to repopulate the in-mem container live.
 	CONTAINER_TRYINIT                    = 0x299140,   // U64 __fastcall(CmServerInventoryContainer* container)
+
+	// ---- drinkEffects (docs/yo_hooks/drink_effects.md) ----
+	DRINK_APPLY_POTION                          = 0x1C4A40,   // CharacterSaveableEffects::applyPotionItemEffect
+	DRINK_ADD_EFFECT                            = 0x1C3AA0,   // core add-effect (fx, effectId, float value, int durationMs, int 0)
+	DRINK_GET_EFFECTS_FEATURE                   = 0x27C040,   // (item) -> ItemEffectsFeature* or null
+	DRINK_DURATION_CONST_A                      = 0x736568,   // float 1000.0
+	DRINK_DURATION_CONST_B                      = 0x73AB8C,   // float 15.0
 };

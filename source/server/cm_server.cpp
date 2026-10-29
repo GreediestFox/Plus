@@ -32,6 +32,7 @@
 #include "hooks/character/hook_set_control_object.h"
 #include "hooks/character/hook_npcdec_pack.h"
 #include "hooks/engine/hook_recipe_starting_tools.h"
+#include "hooks/engine/hook_drink_effects.h"
 #include "hooks/engine/hook_gem_drop.h"
 #include "hooks/engine/hook_tunnel_drop.h"
 #include "hooks/engine/hook_tree_drop.h"
@@ -175,6 +176,7 @@ void Lifx::Server::Init()
 	{
 		const tinyxml2::XMLElement* root = xml_doc.RootElement();
 		Hooks::Engine::ConfigureRecipeStartingTools(root);
+		Hooks::Engine::ConfigureDrinkEffects(root);
 		Hooks::Engine::ConfigureGemDrops(root);
 		Hooks::Engine::ConfigureTunnelDrops(root);
 		Hooks::Engine::ConfigureTreeDrops(root);
@@ -553,6 +555,10 @@ void Lifx::Server::AttachHooks()
 	// the transaction above.
 	Hooks::Engine::AttachTreeDropHook();
 
+	// drink_effects: attached after the main transaction has committed, so it is never part of
+	// (and cannot poison) that shared transaction.
+	Hooks::Engine::AttachDrinkEffectsHook();
+
 	if (commitRc != NO_ERROR) {
 		Con::Warning("[lifx] DetourTransactionCommit FAILED rc=%ld — none of the above hooks are active", (long)commitRc);
 	} else {
@@ -678,6 +684,9 @@ void Lifx::Server::DetachHooks()
 	// Detours patch — do it outside the transaction).
 	Hooks::NpcDecPack::RemoveVtablePatch();
 #endif
+
+	// Hooks with their own Detours transaction (detaching cannot nest inside the one below).
+	Hooks::Engine::DetachDrinkEffectsHook();
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());

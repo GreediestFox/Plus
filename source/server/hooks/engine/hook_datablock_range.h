@@ -22,16 +22,18 @@
 	  - datablock id write in the ghost pack (`mov r9d,402h`, imm32 at RVA 0x13372B) and read (`mov r8d,402h`, imm32 at RVA 0x133D24): 0x402 -> 0x1002
 	  - first ordinary object id (Sim init, imm32 at RVA 0x4297F7 and the live counter at RVA 0xBC8FD4): 0x443 -> 0x1043
 
-	  - id bit width of the two known datablock-id writers (`mov r8d,0Ah`, imm32 at RVA 0x11D7D8 and 0x1389B6): 10 -> 12 bits
+	  - id bit width of the three datablock-id writers (`mov r8d,0Ah`, imm32 at RVA 0x11D7D8, 0x138989 (Sim2DAudioEvent::pack) and 0x1389B6): 10 -> 12 bits
+	  - the matching readers, each `readInt(10) + 3` (`mov edx,0Ah`, imm32 at RVA 0x11F429, 0x138A1A (Sim2DAudioEvent::unpack) and 0x138A56): 10 -> 12 bits
+	  - the mounted-image writer's bit-buffer space check, which must reserve the same width (`add rax,0Ah`, imm8 at RVA 0x11D7BE, and
+	    `mov edx,0Ah`, imm32 at RVA 0x11D7C8): 10 -> 12
 
 	Every site is verified before anything is written (the opcode bytes in front of the immediate AND its current value); if any
 	site does not match, none is patched. If a write fails, the ones already done are put back. The change is not reverted at
 	runtime (ids above the old limit may already be in use), so there is no detach.
 
-	KNOWN LIMITATION: only the sites listed above are widened. Other packers/unpackers that serialise a datablock id with the old
-	10-bit width (the sibling of the pack at RVA 0x138980 in Sim2DAudioEvent, and the matching unpack paths) have not been located,
-	so datablock ids above 1023 are only safe on the paths above. Do not enable this on a server that sends audio events or other
-	datablock-carrying packets with ids above 0x402 until those sites are found.
+	COVERAGE: the sites were found by scanning the whole server for 10-bit ranged writes/reads next to a `datablock id - 3` / `+ 3`
+	conversion; every packer/unpacker of that shape is listed above. A datablock id serialised some other way (a different width
+	or encoding) would not have been found by that scan.
 
 	The client executable carries the same change (patched on disk), so both sides must be switched together.
 
